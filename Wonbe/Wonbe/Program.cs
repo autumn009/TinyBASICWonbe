@@ -1,12 +1,13 @@
 ﻿using CommonLanguageInterface;
 using System;
+using System.Threading.Tasks;
 using WonbeLib;
 
 namespace Wonbe
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine($"*** Welcome, {WonbeLib.Wonbe.GetMyName()} Command Line ***");
             var info = new LanguageBaseStartInfo();
@@ -16,7 +17,7 @@ namespace Wonbe
             var env = new WonbeEnviroment();
             var b = new WonbeLanguageBase();
             b.Environment = env;
-            b.InvokeInterpreterAsync(null);
+            await b.InvokeInterpreterAsync(info);
         }
     }
 }

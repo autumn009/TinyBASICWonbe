@@ -987,7 +987,8 @@ namespace WonbeLib
                     }
                     else if (token.IsCharInRange('a', 'z'))
                     {
-                        await st_assignment(c => {
+                        await st_assignment(c =>
+                        {
                             localVariables[token.GetChar() - 'a'] = c;
                         });
                     }
@@ -1018,7 +1019,7 @@ namespace WonbeLib
         }
 
 
-        private async Task<bool> interactiveMainAsync( List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
+        private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
         {
             for (; ; )
             {
@@ -1099,8 +1100,14 @@ namespace WonbeLib
             }
             else
             {
-                await instance.interactiveMainAsync(new List<WonbeInterToken>(),new List<LineInfo>());
+                await instance.interactiveMainAsync(new List<WonbeInterToken>(), new List<LineInfo>());
             }
+        }
+        public static async Task RunInteractiveAsync(CommonLanguageInterface.LanguageBaseEnvironmentInfo environment)
+        {
+            var instance = new Wonbe();
+            instance.Environment = environment;
+            await instance.interactiveMainAsync(new List<WonbeInterToken>(), new List<LineInfo>());
         }
     }
 }

@@ -6,9 +6,11 @@ namespace WonbeLib
 {
     public class WonbeEnviroment : LanguageBaseEnvironmentInfo
     {
-        public override Task<string> LineInputAsync(string prompt)
+        public override async Task<string> LineInputAsync(string prompt)
         {
-            throw new NotImplementedException();
+            await OutputStringAsync(prompt);
+            await WriteLineAsync();
+            return await Console.In.ReadLineAsync();
         }
 
         public override Task LocateAsync(int x, int y)
@@ -16,14 +18,14 @@ namespace WonbeLib
             throw new NotImplementedException();
         }
 
-        public override Task OutputCharAsync(char ch)
+        public override async Task OutputCharAsync(char ch)
         {
-            throw new NotImplementedException();
+            await Console.Out.WriteAsync(ch);
         }
 
-        public override Task OutputStringAsync(string str)
+        public override async Task OutputStringAsync(string str)
         {
-            throw new NotImplementedException();
+            await Console.Out.WriteAsync(str);
         }
 
         public override Task SetColorAsync(LanguageBaseColor color)
@@ -36,16 +38,18 @@ namespace WonbeLib
 
     public class WonbeLanguageBase : AbastractLanguageBase
     {
-        public override async Task InvokeCompilerAsync(LanguageBaseStartInfo startInfo)
+        public override async Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo)
         {
-            if( startInfo.RunRequest)
+            if (startInfo.RunRequest)
             {
                 await Wonbe.RunProgramAsync(startInfo.SourceCodeFileName, Environment);
             }
-
-            throw new NotImplementedException();
+            else
+            {
+                await Wonbe.RunInteractiveAsync(Environment);
+            }
         }
 
-        public override Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo) => throw new NotImplementedException();
+        public override Task InvokeCompilerAsync(LanguageBaseStartInfo startInfo) => throw new NotImplementedException();
     }
 }
