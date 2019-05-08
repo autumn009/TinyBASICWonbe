@@ -1025,6 +1025,7 @@ namespace WonbeLib
             bInteractive = true;
             for (; ; )
             {
+                dstList.Clear();
                 string s = await Environment.LineInputAsync("");
                 if (s == null) return false;
                 if (string.IsNullOrWhiteSpace(s)) continue;
@@ -1043,7 +1044,8 @@ namespace WonbeLib
 
                 /* 中間言語に翻訳する */
                 bool b = await convertInternalCode(s.Substring(src), dstList, lineNumber);
-                if (b == false || bForceToReturnSuper) return false;
+                if (b == false) continue;
+                if (bForceToReturnSuper) continue;
                 dstList.Add(new EOLWonbeInterToken(lineNumber));
                 /* 数値で開始されているか? */
                 if (dstList[0] is NumericalWonbeInterToken)
@@ -1066,6 +1068,7 @@ namespace WonbeLib
                     il = dstList.ToArray();
                     executionPointer = 0;
                     await interpreterMain();
+                    bForceToReturnSuper = false;
                 }
             }
         }
