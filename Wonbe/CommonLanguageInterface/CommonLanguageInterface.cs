@@ -35,6 +35,7 @@ namespace CommonLanguageInterface
         public abstract Task OutputCharAsync(char ch);
         public abstract Task LocateAsync(int x, int y);
         public abstract Task SetColorAsync(LanguageBaseColor color);
+        public abstract Task YieldAsync();
     }
     public abstract class AbastractLanguageBase
     {

@@ -30,12 +30,19 @@ namespace WonbeLib
         {
             throw new NotImplementedException();
         }
+
+        public override async Task YieldAsync() => await Task.FromResult(false);
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase
     {
         public override Task InvokeCompilerAsync(LanguageBaseStartInfo startInfo)
         {
+            if( startInfo.RunRequest)
+            {
+                Wonbe.RunProgram(startInfo.SourceCodeFileName);
+            }
+
             throw new NotImplementedException();
         }
 
