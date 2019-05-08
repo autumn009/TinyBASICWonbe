@@ -156,7 +156,7 @@ namespace WonbeLib
         private async Task<bool> reportError(string errorType)
         {
             bForceToReturnSuper = true;
-            if (executionPointer >= il.Length)
+            if (executionPointer >= il.Length || lineInfos == null)
             {
                 await Environment.WriteLineAsync("{0} in ?\r\n", errorType);
                 return false;
@@ -259,6 +259,7 @@ namespace WonbeLib
         private short[] array = new short[availableArrayItems];
 
         public LanguageBaseEnvironmentInfo Environment { get; private set; }
+        public bool appendMode { get; private set; }
 
         /// <summary>
         /// 配列のインデックスを解析する
@@ -1021,6 +1022,7 @@ namespace WonbeLib
 
         private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
         {
+            bInteractive = true;
             for (; ; )
             {
                 string s = await Environment.LineInputAsync("");
@@ -1038,19 +1040,44 @@ namespace WonbeLib
                     lineNumber += s[src] - '0';
                     src++;
                 }
-                if (lineNumber == 0)
-                {
-                    await Environment.OutputStringAsync($"Syntax Error in {lineNumber}\r\n{s}\r\n");
-                    return false;
-                }
-
-                lineInfos.Add(new LineInfo(lineNumber, s, dstList.Count()));
 
                 /* 中間言語に翻訳する */
                 bool b = await convertInternalCode(s.Substring(src), dstList, lineNumber);
                 if (b == false || bForceToReturnSuper) return false;
                 dstList.Add(new EOLWonbeInterToken(lineNumber));
+                /* 数値で開始されているか? */
+                if (dstList[0] is NumericalWonbeInterToken)
+                {
+                    /* 行エディタを呼び出す */
+                    if (appendMode)
+                    {
+                        appendLine();
+                    }
+                    else
+                    {
+                        editLine();
+                    }
+                    // TBW if not loading source from storage
+                    clearRuntimeInfo();
+                }
+                else
+                {
+                    /* その行を実行する */
+                    il = dstList.ToArray();
+                    executionPointer = 0;
+                    await interpreterMain();
+                }
             }
+        }
+
+        private void editLine()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void appendLine()
+        {
+            throw new NotImplementedException();
         }
 
         /* プログラムの実行開始 */
