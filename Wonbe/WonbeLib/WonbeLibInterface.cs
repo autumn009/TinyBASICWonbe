@@ -36,11 +36,11 @@ namespace WonbeLib
 
     public class WonbeLanguageBase : AbastractLanguageBase
     {
-        public override Task InvokeCompilerAsync(LanguageBaseStartInfo startInfo)
+        public override async Task InvokeCompilerAsync(LanguageBaseStartInfo startInfo)
         {
             if( startInfo.RunRequest)
             {
-                Wonbe.RunProgram(startInfo.SourceCodeFileName);
+                await Wonbe.RunProgramAsync(startInfo.SourceCodeFileName, Environment);
             }
 
             throw new NotImplementedException();

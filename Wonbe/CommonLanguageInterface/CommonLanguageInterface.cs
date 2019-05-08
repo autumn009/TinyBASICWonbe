@@ -36,6 +36,13 @@ namespace CommonLanguageInterface
         public abstract Task LocateAsync(int x, int y);
         public abstract Task SetColorAsync(LanguageBaseColor color);
         public abstract Task YieldAsync();
+
+        public async Task WriteLineAsync() => await OutputStringAsync("\r\n");
+        public async Task WriteLineAsync(string msg, params object[] args)
+        {
+            await OutputStringAsync(string.Format(msg, args));
+            await WriteLineAsync();
+        }
     }
     public abstract class AbastractLanguageBase
     {

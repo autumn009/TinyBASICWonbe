@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using CommonLanguageInterface;
 
 namespace WonbeLib
 {
@@ -84,8 +85,8 @@ namespace WonbeLib
     public class KeywordAssociation
     {
         public readonly string TargetString;
-        public readonly Action TargetAction;
-        public KeywordAssociation(string targetString, Action targetAction = null)
+        public readonly Func<Task> TargetAction;
+        public KeywordAssociation(string targetString, Func<Task> targetAction = null)
         {
             this.TargetString = targetString;
             this.TargetAction = targetAction;
@@ -107,9 +108,6 @@ namespace WonbeLib
 
     public class Wonbe
     {
-        private TextWriter outputWriter = null;
-        CancellationToken cancelationToken;
-
         private const string myVersion = "0.10";
 
         private bool bInteractive;
@@ -155,37 +153,37 @@ namespace WonbeLib
         private bool bForceToReturnSuper = false;
 
         /* エラー発生 */
-        private bool reportError(string errorType)
+        private async Task<bool> reportError(string errorType)
         {
             bForceToReturnSuper = true;
             if (executionPointer >= il.Length)
             {
-                outputWriter.WriteLine("{0} in ?\r\n", errorType);
+                await Environment.WriteLineAsync("{0} in ?\r\n", errorType);
                 return false;
             }
             var n = il[executionPointer].LineNumber;
             var found = lineInfos.Where(c => c.LineNumber == n).FirstOrDefault();
             if (found == null)
             {
-                outputWriter.WriteLine("{0} in ?\r\n", errorType);
+                await Environment.WriteLineAsync("{0} in ?\r\n", errorType);
                 return false;
             }
-            outputWriter.WriteLine("{0} in {1}\r\n{2}\r\n", errorType, found.LineNumber, found.SourceText);
+            await Environment.WriteLineAsync("{0} in {1}\r\n{2}\r\n", errorType, found.LineNumber, found.SourceText);
             return false;
         }
 
-        private bool syntaxError() { return reportError("Syntax Error"); }
-        private void divideByZero() { reportError("Divide by 0"); }
-        private void outOfArraySubscription() { reportError("Out of Array Subscription"); }
-        private void stackOverflow() { reportError("Stack Overflow"); }
-        private void stackUnderflow() { reportError("Stack Underflow"); }
-        private void nextWithoutFor() { reportError("Next without For"); }
-        private void outOfMemory() { reportError("Out of memory"); }
-        private void paramError() { reportError("Parameter Error"); }
-        private void breakBySatement() { reportError("Break"); }
-        void lineNumberNotFound(ushort lineNumber)
+        private async Task<bool> syntaxError() { return await reportError("Syntax Error"); }
+        private async Task divideByZero() { await reportError("Divide by 0"); }
+        private async Task outOfArraySubscription() { await reportError("Out of Array Subscription"); }
+        private async Task stackOverflow() { await reportError("Stack Overflow"); }
+        private async Task stackUnderflow() { await reportError("Stack Underflow"); }
+        private async Task nextWithoutFor() { await reportError("Next without For"); }
+        private async Task outOfMemory() { await reportError("Out of memory"); }
+        private async Task paramError() { await reportError("Parameter Error"); }
+        private async Task breakBySatement() { await reportError("Break"); }
+        private async Task lineNumberNotFound(ushort lineNumber)
         {
-            reportError(string.Format("Line Number {0} not Found", lineNumber));
+            await reportError(string.Format("Line Number {0} not Found", lineNumber));
         }
 
         int skipToEOL(int p)
@@ -234,7 +232,7 @@ namespace WonbeLib
         }
 
         /* 行頭の行番号の、実行時の定型処理 */
-        void processLineHeader()
+        async Task processLineHeader()
         {
             if (il.Length <= executionPointer)
             {
@@ -244,7 +242,7 @@ namespace WonbeLib
             currentLineNumber = (ushort)il[executionPointer].LineNumber;
             if (traceFlag && il.Length > executionPointer)
             {
-                outputWriter.Write("[{0}]", il[executionPointer].LineNumber);
+                await Environment.OutputStringAsync($"[{il[executionPointer].LineNumber}]");
             }
         }
 
@@ -260,39 +258,41 @@ namespace WonbeLib
         private const int availableArrayItems = 1024;
         private short[] array = new short[availableArrayItems];
 
+        public LanguageBaseEnvironmentInfo Environment { get; private set; }
+
         /// <summary>
         /// 配列のインデックスを解析する
         /// </summary>
         /// <returns>配列の添え字。無効の場合はnull</returns>
-        int? getArrayReference()
+        async Task<int?> getArrayReference()
         {
             int index;
             var token = skipEPToNonWhiteSpace() as StringWonbeInterToken;
             if (token != null && token.TargetString != '(' && token.TargetString != '[')
             {
-                syntaxError();
+                await syntaxError();
                 return null;
             }
-            index = expr();
+            index = await expr();
             if (bForceToReturnSuper) return null;
 
             if (index < 0 || index >= array.Length)
             {
-                outOfArraySubscription();
+                await outOfArraySubscription();
                 return null;	/* そのインデックスは使えません */
             }
 
             var token2 = skipEPToNonWhiteSpace() as StringWonbeInterToken;
             if (token2 != null && token2.TargetString != ')' && token2.TargetString != ']')
             {
-                syntaxError();
+                await syntaxError();
                 return null;
             }
             return index;
         }
 
         /* 式計算機能 */
-        short calcValue()
+        async Task<short> calcValue()
         {
             var token = skipEPToNonWhiteSpace();
             if (token.IsCharInRange('A', 'Z'))
@@ -305,15 +305,15 @@ namespace WonbeLib
             }
             if (token.GetChar() == '@')
             {
-                int index = getArrayReference() ?? -1;
+                int index = await getArrayReference() ?? -1;
                 if (bForceToReturnSuper) return -1;
                 return array[index];
             }
-            if (token.IsKeyword("not")) return (short)(~calcValue());
-            if (token.IsKeyword("rnd")) return (short)random.Next(calcValue());
+            if (token.IsKeyword("not")) return (short)~await calcValue();
+            if (token.IsKeyword("rnd")) return (short)random.Next(await calcValue());
             if (token.IsKeyword("abs"))
             {
-                short t = calcValue();
+                short t = await calcValue();
                 if (t < 0) return (short)-t;
                 return t;
             }
@@ -327,22 +327,22 @@ namespace WonbeLib
                 case '(':
                     {
                         short t;
-                        t = expr();
+                        t = await expr();
                         var token2 = skipEPToNonWhiteSpace();
                         if (token2.GetChar() != ')') break;
                         return t;
                     }
                 case '-':
-                    return (short)(-calcValue());
+                    return (short)(-await calcValue());
             }
-            syntaxError();
+            await syntaxError();
             return -1;
         }
 
-        short expr4th()
+        private async Task<short> expr4th()
         {
             short acc;
-            acc = calcValue();
+            acc = await calcValue();
             if (bForceToReturnSuper) return -1;
 
             for (; ; )
@@ -351,15 +351,15 @@ namespace WonbeLib
                 switch ((int)token.GetChar())
                 {
                     case '*':
-                        acc = (short)(acc * calcValue());
+                        acc = (short)(acc * await calcValue());
                         break;
                     case '/':
                         {
                             short t;
-                            t = calcValue();
+                            t = await calcValue();
                             if (t == 0)
                             {
-                                divideByZero();
+                                await divideByZero();
                             }
                             else
                             {
@@ -375,10 +375,10 @@ namespace WonbeLib
             }
         }
 
-        short expr3rd()
+        async Task<short> expr3rd()
         {
             short acc;
-            acc = expr4th();
+            acc = await expr4th();
             if (bForceToReturnSuper) return -1;
 
             for (; ; )
@@ -387,10 +387,10 @@ namespace WonbeLib
                 switch ((int)token.GetChar())
                 {
                     case '+':
-                        acc = (short)(acc + expr4th());
+                        acc = (short)(acc + await expr4th());
                         break;
                     case '-':
-                        acc = (short)(acc - expr4th());
+                        acc = (short)(acc - await expr4th());
                         break;
                     default:
                         executionPointer--;		/* unget it */
@@ -400,10 +400,10 @@ namespace WonbeLib
             }
         }
 
-        short expr2nd()
+        async Task<short> expr2nd()
         {
             short acc;
-            acc = expr3rd();
+            acc = await expr3rd();
             if (bForceToReturnSuper) return -1;
 
             for (; ; )
@@ -416,13 +416,13 @@ namespace WonbeLib
                             var token2 = skipEPToNonWhiteSpace();
                             if (token2.GetChar() == '=')
                             {
-                                acc = (short)(acc >= expr3rd() ? 1 : 0);
+                                acc = (short)(acc >= await expr3rd() ? 1 : 0);
                                 if (acc != 0) acc = -1;
                             }
                             else
                             {
                                 executionPointer--;
-                                acc = (short)(acc > expr3rd() ? 1 : 0);
+                                acc = (short)(acc > await expr3rd() ? 1 : 0);
                                 if (acc != 0) acc = -1;
                             }
                         }
@@ -432,24 +432,24 @@ namespace WonbeLib
                             var token2 = skipEPToNonWhiteSpace();
                             if (token2.GetChar() == '=')
                             {
-                                acc = (short)(acc <= expr3rd() ? 1 : 0);
+                                acc = (short)(acc <= await expr3rd() ? 1 : 0);
                                 if (acc != 0) acc = -1;
                             }
                             else if (token2.GetChar() == '>')
                             {
-                                acc = (short)(acc != expr3rd() ? 1 : 0);
+                                acc = (short)(acc != await expr3rd() ? 1 : 0);
                                 if (acc != 0) acc = -1;
                             }
                             else
                             {
                                 executionPointer--;
-                                acc = (short)(acc < expr3rd() ? 1 : 0);
+                                acc = (short)(acc < await expr3rd() ? 1 : 0);
                                 if (acc != 0) acc = -1;
                             }
                         }
                         break;
                     case '=':
-                        acc = (short)(acc == expr3rd() ? 1 : 0);
+                        acc = (short)(acc == await expr3rd() ? 1 : 0);
                         if (acc != 0) acc = -1;
                         break;
                     default:
@@ -460,21 +460,21 @@ namespace WonbeLib
             }
         }
 
-        short expr()
+        async Task<short> expr()
         {
             short acc;
-            acc = expr2nd();
+            acc = await expr2nd();
             if (bForceToReturnSuper) return -1;
 
             for (; ; )
             {
                 var token = skipEPToNonWhiteSpace();
                 if (token.IsKeyword("and"))
-                    acc = (short)(acc & expr2nd());
+                    acc = (short)(acc & await expr2nd());
                 else if (token.IsKeyword("or"))
-                    acc = (short)(acc | expr2nd());
+                    acc = (short)(acc | await expr2nd());
                 else if (token.IsKeyword("xor"))
-                    acc = (short)(acc ^ expr2nd());
+                    acc = (short)(acc ^ await expr2nd());
                 else
                 {
                     executionPointer--;     /* unget it */
@@ -486,20 +486,20 @@ namespace WonbeLib
 
         /* 各ステートメント実行処理メイン */
 
-        void st_assignment(Action<short> setter)	/* 代入ステートメントだけ例外的に処理する */
+        async Task st_assignment(Action<short> setter)	/* 代入ステートメントだけ例外的に処理する */
         {
             var token = skipEPToNonWhiteSpace();
             if (token.GetChar() != '=')
             {
-                syntaxError();
+                await syntaxError();
                 return;
             }
-            short val = expr();
+            short val = await expr();
             if (bForceToReturnSuper) return;
             setter(val);
         }
 
-        void st_print()
+        async Task st_print()
         {
             char lastChar = '\0';
             for (; ; )
@@ -522,13 +522,13 @@ namespace WonbeLib
 
                 if (token is LiteralWonbeInterToken)
                 {
-                    outputWriter.Write((token as LiteralWonbeInterToken).TargetString);
+                    await Environment.OutputStringAsync((token as LiteralWonbeInterToken).TargetString);
                 }
                 else if (token.IsKeyword("chr"))
                 {
-                    ushort val = (ushort)expr();
+                    ushort val = (ushort)await expr();
                     if (bForceToReturnSuper) return;
-                    outputWriter.Write((char)val);
+                    await Environment.OutputCharAsync((char)val);
                 }
                 else
                 {
@@ -537,15 +537,15 @@ namespace WonbeLib
                         case ';':
                             break;
                         case ',':
-                            outputWriter.Write('\t');
+                            await Environment.OutputCharAsync('\t');
                             break;
                         default:
                             {
                                 short val;
                                 executionPointer--;	/* unget it */
-                                val = expr();
+                                val = await expr();
                                 if (bForceToReturnSuper) return;
-                                outputWriter.Write(val);
+                                await Environment.OutputCharAsync((char)val);
                             }
                             break;
                     }
@@ -553,42 +553,42 @@ namespace WonbeLib
             }
             if (lastChar != ';' && lastChar != ',')
             {
-                outputWriter.WriteLine();
+                await Environment.WriteLineAsync();
             }
         }
 
-        void st_goto()
+        async Task st_goto()
         {
             short val;
             int? t;
-            val = expr();
+            val = await expr();
             if (bForceToReturnSuper) return;
             t = getLineReferenceFromLineNumber((ushort)val);
             if (t == null)
             {
-                lineNumberNotFound((ushort)val);
+                await lineNumberNotFound((ushort)val);
                 return;
             }
             executionPointer = (int)t;
             bInteractive = false;
-            processLineHeader();
+            await processLineHeader();
         }
 
-        void st_gosub()
+        async Task st_gosub()
         {
             short val;
             int? t;
-            val = expr();
+            val = await expr();
             if (bForceToReturnSuper) return;
             t = getLineReferenceFromLineNumber((ushort)val);
             if (t == null)
             {
-                lineNumberNotFound((ushort)val);
+                await lineNumberNotFound((ushort)val);
                 return;
             }
             if (stackPointer + 1 >= STACK_MAX)
             {
-                stackOverflow();
+                await stackOverflow();
                 return;
             }
             stacks[stackPointer].type = StackType.Gosub;
@@ -598,16 +598,16 @@ namespace WonbeLib
             stackPointer++;
             executionPointer = (int)t;
             bInteractive = false;
-            processLineHeader();
+            await processLineHeader();
         }
 
-        void st_return()
+        async Task st_return()
         {
             for (; ; )
             {
                 if (stackPointer == 0)
                 {
-                    stackUnderflow();
+                    await stackUnderflow();
                     return;
                 }
                 stackPointer--;
@@ -617,14 +617,14 @@ namespace WonbeLib
             localVariables = stacks[stackPointer].lastLocalVariables;
         }
 
-        void st_if()
+        async Task st_if()
         {
-            short val = expr();
+            short val = await expr();
             if (bForceToReturnSuper) return;
             var token = skipEPToNonWhiteSpace();
             if (!token.IsKeyword("then"))
             {
-                syntaxError();
+                await syntaxError();
                 return;
             }
             if (val != 0)
@@ -634,7 +634,7 @@ namespace WonbeLib
                 {
                     // thenのあとに整数が直接書かれた場合は、それにgotoする。
                     executionPointer--;
-                    st_goto();
+                    await st_goto();
                     return;
                 }
                 executionPointer--;
@@ -644,7 +644,7 @@ namespace WonbeLib
             executionPointer = skipToEOL(executionPointer);
         }
 
-        void st_for()
+        async Task st_for()
         {
             short from, to, step;
             Action<short> setvar;
@@ -652,7 +652,7 @@ namespace WonbeLib
             var token = skipEPToNonWhiteSpace();
             if (token.GetChar() == '@')
             {	/* is it l-value? */
-                int? pvar = getArrayReference();
+                int? pvar = await getArrayReference();
                 if (pvar == null) return;
                 setvar = c => { array[(int)pvar] = c; };
                 getvar = () => array[(int)pvar];
@@ -677,29 +677,29 @@ namespace WonbeLib
             }
             else
             {
-                syntaxError();
+                await syntaxError();
                 return;
             }
             var token2 = skipEPToNonWhiteSpace();
             if (token2.GetChar() != '=')
             {
-                syntaxError();
+                await syntaxError();
                 return;
             }
-            from = expr();
+            from = await expr();
             if (bForceToReturnSuper) return;
             var token3 = skipEPToNonWhiteSpace();
             if (!token3.IsKeyword("to"))
             {
-                syntaxError();
+                await syntaxError();
                 return;
             }
-            to = expr();
+            to = await expr();
             if (bForceToReturnSuper) return;
             var token4 = skipEPToNonWhiteSpace();
             if (token4.IsKeyword("step"))
             {
-                step = expr();
+                step = await expr();
                 if (bForceToReturnSuper) return;
             }
             else
@@ -710,7 +710,7 @@ namespace WonbeLib
 
             if (stackPointer + 1 >= STACK_MAX)
             {
-                stackOverflow();
+                await stackOverflow();
                 return;
             }
             stacks[stackPointer].type = StackType.For;
@@ -723,16 +723,16 @@ namespace WonbeLib
             stackPointer++;
         }
 
-        void st_next()
+        async Task st_next()
         {
             if (stackPointer == 0)
             {
-                nextWithoutFor();
+                await nextWithoutFor();
                 return;
             }
             if (stacks[stackPointer - 1].type != StackType.For)
             {
-                nextWithoutFor();
+                await nextWithoutFor();
                 return;
             }
             if (stacks[stackPointer - 1].limit == stacks[stackPointer - 1].getvar())
@@ -766,56 +766,61 @@ namespace WonbeLib
         }
 
         /* endステートメント:　正常な終了 */
-        void st_end()
+        async Task st_end()
         {
             bForceToReturnSuper = true;
+            await Task.Delay(0);
         }
 
         /* breakステートメント:　デバッグ用の中断 */
-        void st_break()
+        async Task st_break()
         {
-            breakBySatement();
+            await breakBySatement();
         }
 
-        void st_rem()
+        async Task st_rem()
         {
             executionPointer = skipToEOL(executionPointer);
+            await Task.Delay(0);
         }
 
-        void st_randomize()
+        async Task st_randomize()
         {
             short val;
-            val = expr();
+            val = await expr();
             this.random = new Random(val);
         }
 
-        void st_exit()
+        async Task st_exit()
         {
             bForceToReturnSuper = true;
+            await Task.Delay(0);
         }
 
-        void st_waitms()
+        async Task st_waitms()
         {
             short val;
-            val = expr();
+            val = await expr();
             if (bForceToReturnSuper) return;
             if (val < 0 || val > 3000)
             {
-                paramError();
+                await paramError();
                 return;
             }
             var task = System.Threading.Tasks.Task.Delay(val);
             task.Wait();
         }
 
-        void st_tron()
+        async Task st_tron()
         {
             traceFlag = true;
+            await Task.Delay(0);
         }
 
-        void st_troff()
+        async Task st_troff()
         {
             traceFlag = false;
+            await Task.Delay(0);
         }
 
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
@@ -829,7 +834,7 @@ namespace WonbeLib
         }
 
         /* 中間言語に翻訳する */
-        bool convertInternalCode(string srcLine, List<WonbeInterToken> dst, int lineNumber)
+        async Task<bool> convertInternalCode(string srcLine, List<WonbeInterToken> dst, int lineNumber)
         {
             KeywordAssociation[] AssocTable =
                 {
@@ -870,7 +875,7 @@ namespace WonbeLib
                     src++;
                     continue;
                 }
-                if (srcLine[src] < 0x20) return syntaxError();
+                if (srcLine[src] < 0x20) return await syntaxError();
                 char next = (srcLine.Length <= src + 1) ? '\0' : srcLine[src + 1];
                 if (srcLine[src] == '0' && next == 'x')
                 {
@@ -899,7 +904,7 @@ namespace WonbeLib
                         acc += srcLine[src] - '0';
                         src++;
                         // overflow case
-                        if (acc < 0) return syntaxError();
+                        if (acc < 0) return await syntaxError();
                     }
                     dst.Add(new NumericalWonbeInterToken(lineNumber, acc));
                 }
@@ -927,7 +932,7 @@ namespace WonbeLib
                     for (; ; )
                     {
                         char v = srcLine[src++];
-                        if (v == '\0') return syntaxError();
+                        if (v == '\0') return await syntaxError();
                         if (v == '"') break;
                         sb.Append(v);
                     }
@@ -941,12 +946,12 @@ namespace WonbeLib
             return true;
         }
 
-        void interpreterMain()
+        async Task interpreterMain()
         {
             for (; ; )
             {
                 /* 行の開始 */
-                processLineHeader();
+                await processLineHeader();
                 /* 最後に達してしまった? */
                 if (!bInteractive && currentLineNumber == 0)
                 {
@@ -956,11 +961,6 @@ namespace WonbeLib
 
                 for (; ; )
                 {
-                    if (cancelationToken != null && cancelationToken.IsCancellationRequested)
-                    {
-                        outputWriter.WriteLine("TIME OUT, force to terminated");
-                        return;
-                    }
                     var token = il[executionPointer++];
                     if (token is EOLWonbeInterToken) break;
                     if (token.GetChar() == ' ' || token.GetChar() == '\t' || token.GetChar() == ':')
@@ -969,47 +969,47 @@ namespace WonbeLib
                     }
                     else if (token.GetChar() == '\'')
                     {	/* comment */
-                        st_rem();
+                        await st_rem();
                     }
                     else if (token.GetChar() == '@')
                     {	/* is it l-value? */
                         int? pvar;
-                        pvar = getArrayReference();
+                        pvar = await getArrayReference();
                         if (pvar == null) return;
-                        st_assignment(c => { array[(int)pvar] = c; });
+                        await st_assignment(c => { array[(int)pvar] = c; });
                     }
                     else if (token.IsCharInRange('A', 'Z'))
                     {
-                        st_assignment(c =>
+                        await st_assignment(c =>
                         {
                             globalVariables[token.GetChar() - 'A'] = c;
                         });
                     }
                     else if (token.IsCharInRange('a', 'z'))
                     {
-                        st_assignment(c => {
+                        await st_assignment(c => {
                             localVariables[token.GetChar() - 'a'] = c;
                         });
                     }
                     else if (token is KeywordWonbeInterToken)
                     {
-                        Action a = (token as KeywordWonbeInterToken).Assoc.TargetAction;
+                        Func<Task> a = (token as KeywordWonbeInterToken).Assoc.TargetAction;
                         if (a == null)
                         {
-                            syntaxError();
+                            await syntaxError();
                         }
                         else
                         {
-                            a();
+                            await a();
                         }
                     }
                     else if (token.GetChar() == '?')
                     {
-                        st_print();
+                        await st_print();
                     }
                     else
                     {
-                        syntaxError();
+                        await syntaxError();
                     }
                     if (bForceToReturnSuper) return;
                 }
@@ -1018,11 +1018,11 @@ namespace WonbeLib
         }
 
 
-        bool interactiveMain(TextReader reader, List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
+        private async Task<bool> interactiveMainAsync( List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
         {
             for (; ; )
             {
-                string s = reader.ReadLine();
+                string s = await Environment.LineInputAsync("");
                 if (s == null) return false;
                 if (string.IsNullOrWhiteSpace(s)) continue;
 
@@ -1039,14 +1039,14 @@ namespace WonbeLib
                 }
                 if (lineNumber == 0)
                 {
-                    outputWriter.WriteLine("Syntax Error in {0}\r\n{1}\r\n", lineNumber, s);
+                    await Environment.OutputStringAsync($"Syntax Error in {lineNumber}\r\n{s}\r\n");
                     return false;
                 }
 
                 lineInfos.Add(new LineInfo(lineNumber, s, dstList.Count()));
 
                 /* 中間言語に翻訳する */
-                bool b = convertInternalCode(s.Substring(src), dstList, lineNumber);
+                bool b = await convertInternalCode(s.Substring(src), dstList, lineNumber);
                 if (b == false || bForceToReturnSuper) return false;
                 dstList.Add(new EOLWonbeInterToken(lineNumber));
             }
@@ -1068,13 +1068,13 @@ namespace WonbeLib
             traceFlag = false;
         }
 
-        bool loadSource(string p)
+        private async Task<bool> loadSource(string p)
         {
             do_new();
             var reader = new StringReader(p);
             var list = new List<WonbeInterToken>();
             var lineInfos = new List<LineInfo>();
-            interactiveMain(reader, list, lineInfos);
+            await interactiveMainAsync(list, lineInfos);
             this.il = list.ToArray();
             this.lineInfos = lineInfos.ToArray();
             clearRuntimeInfo();
@@ -1086,34 +1086,21 @@ namespace WonbeLib
             return "Wonbe 2019 Ver " + myVersion;
         }
 
-        public static string RunProgram(string p)
+
+
+        public static async Task RunProgramAsync(string p, CommonLanguageInterface.LanguageBaseEnvironmentInfo environment)
         {
             var instance = new Wonbe();
-            var tokenSource = new CancellationTokenSource();
-            var token = tokenSource.Token;
-            var task = new Task(() =>
+            instance.Environment = environment;
+            if (await instance.loadSource(p))
             {
-                using (instance.outputWriter = new StringWriter())
-                {
-                    instance.cancelationToken = token;
-                    if (instance.loadSource(p))
-                    {
-                        instance.do_run();
-                        instance.interpreterMain();
-                    }
-                }
-            }, token);
-            task.Start();
-            task.Wait(new TimeSpan(0, 0, 10));
-            // コンプリートしてなかったら強制キャンセルじゃ
-            if (!task.IsCompleted)
-            {
-                tokenSource.Cancel();
-                task.Wait();
+                instance.do_run();
+                await instance.interpreterMain();
             }
-            string r = instance.outputWriter.ToString();
-            if (string.IsNullOrWhiteSpace(r)) r = "実行は終了しました。(出力結果文字列はありません) " + DateTime.Now.ToString();
-            return r;
+            else
+            {
+                await instance.interactiveMainAsync(new List<WonbeInterToken>(),new List<LineInfo>());
+            }
         }
     }
 }
