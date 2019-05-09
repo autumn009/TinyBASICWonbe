@@ -947,8 +947,16 @@ namespace WonbeLib
             }, from, to);	/* リスト出力の本体を呼ぶ */
         }
 
-        private async Task st_new() { throw new NotImplementedException(); }
+        private async Task st_new()
+        {
+            clearRuntimeInfo();
+            StoredSource.Clear();
+            bForceToReturnSuper = true;
+            await Task.Delay(0);
+        }
+
         private async Task st_run() { throw new NotImplementedException(); }
+
         private async Task st_cont() { throw new NotImplementedException(); }
         private async Task st_save() { throw new NotImplementedException(); }
         private async Task st_load() { throw new NotImplementedException(); }
@@ -1162,6 +1170,7 @@ namespace WonbeLib
                         else
                         {
                             await a();
+                            if (bForceToReturnSuper) return;
                         }
                     }
                     else if (token.GetChar() == '?')
