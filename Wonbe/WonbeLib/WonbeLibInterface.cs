@@ -40,14 +40,8 @@ namespace WonbeLib
     {
         public override async Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo)
         {
-            if (startInfo.RunRequest)
-            {
-                await Wonbe.RunProgramAsync(startInfo.SourceCodeFileName, Environment);
-            }
-            else
-            {
-                await Wonbe.RunInteractiveAsync(Environment);
-            }
+            var instance = new Wonbe(Environment);
+            await instance.SuperMain(startInfo.RunRequest, startInfo.SourceCodeFileName);
         }
 
         public override Task InvokeCompilerAsync(LanguageBaseStartInfo startInfo) => throw new NotImplementedException();

@@ -140,6 +140,7 @@ namespace WonbeLib
 
         /* 現在実行中の位置に関する情報 */
         /* 配列intermeditateExecitionLineのインデクス */
+        private StoredSourcecodeLine CurrentExecutionLine = null;
         private int intermeditateExecutionPointer = 0;
         private WonbeInterToken[] intermeditateExecitionLine;
 
@@ -961,13 +962,14 @@ namespace WonbeLib
             StoredSourcecodeLine last = null;
             foreach (var item in StoredSource)
             {
-                if (last == null) continue;
-                last.NextLine = item;
+                if (last != null) last.NextLine = item;
                 last = item;
                 last.NextLine = null;
             }
+            CurrentExecutionLine = StoredSource[0];
             intermeditateExecitionLine = StoredSource[0].InterimTokens;
             intermeditateExecutionPointer = 0;
+            currentLineNumber = (ushort)StoredSource[0].LineNumber;
         }
 
         private async Task st_run()
@@ -975,8 +977,9 @@ namespace WonbeLib
             if (StoredSource.Count == 0) return;    // if no lines in source, do nothing
             clearRuntimeInfo();
             bInteractive = false;
+            bForceToReturnSuper = true;
             setupRuntimeEnvironment();
-            await interpreterMain();
+            await Task.Delay(0);
         }
 
         private async Task st_cont() { throw new NotImplementedException(); }
@@ -1145,6 +1148,7 @@ namespace WonbeLib
                 /* 最後に達してしまった? */
                 if (!bInteractive && currentLineNumber == 0)
                 {
+                    bInteractive = true;
                     bForceToReturnSuper = true;
                     return;
                 }
@@ -1206,9 +1210,19 @@ namespace WonbeLib
                     if (bForceToReturnSuper) return;
                 }
                 if (bInteractive) return;
+                /* 行が尽きたので次の行に行く */
+                CurrentExecutionLine = CurrentExecutionLine.NextLine;
+                if (CurrentExecutionLine == null)
+                {
+                    bInteractive = true;
+                    bForceToReturnSuper = true;
+                    return;
+                }
+                currentLineNumber = (ushort)CurrentExecutionLine.LineNumber;
+                intermeditateExecitionLine = CurrentExecutionLine.InterimTokens;
+                intermeditateExecutionPointer = 0;
             }
         }
-
 
         private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
         {
@@ -1216,6 +1230,8 @@ namespace WonbeLib
             for (; ; )
             {
                 if (bForceToExit) return true;
+                if (!bInteractive) return false;
+                if (bForceToReturnSuper) return false;
                 dstList.Clear();
                 await Environment.WriteLineAsync("OK");
                 string s = await Environment.LineInputAsync("");
@@ -1256,7 +1272,7 @@ namespace WonbeLib
                     intermeditateExecitionLine = dstList.ToArray();
                     intermeditateExecutionPointer = 0;
                     await interpreterMain();
-                    bForceToReturnSuper = false;
+                    //bForceToReturnSuper = false;
                 }
             }
         }
@@ -1334,27 +1350,29 @@ namespace WonbeLib
             return "Wonbe 2019 Ver " + myVersion;
         }
 
-
-
-        public static async Task RunProgramAsync(string p, CommonLanguageInterface.LanguageBaseEnvironmentInfo environment)
+        internal async Task SuperMain(bool runRequest, string sourceCodeFileName)
         {
-            var instance = new Wonbe();
-            instance.Environment = environment;
-            if (await instance.loadSource(p))
+            bInteractive = true;
+            if (runRequest)
             {
-                instance.do_run();
-                await instance.interpreterMain();
+                if (await loadSource(sourceCodeFileName))
+                {
+                    do_run();
+                    bInteractive = false;
+                }
             }
-            else
+            for (; ; )
             {
-                await instance.interactiveMainAsync(new List<WonbeInterToken>(), new List<LineInfo>());
+                if (bForceToExit) return;
+                bForceToExit = false;
+                bForceToReturnSuper = false;
+                bForceToExit = false;
+                if (bInteractive)
+                    await interactiveMainAsync(new List<WonbeInterToken>(), new List<LineInfo>());
+                else
+                    await interpreterMain();
             }
         }
-        public static async Task RunInteractiveAsync(CommonLanguageInterface.LanguageBaseEnvironmentInfo environment)
-        {
-            var instance = new Wonbe();
-            instance.Environment = environment;
-            await instance.interactiveMainAsync(new List<WonbeInterToken>(), new List<LineInfo>());
-        }
+        public Wonbe(LanguageBaseEnvironmentInfo Environment) => this.Environment = Environment;
     }
 }
