@@ -546,7 +546,7 @@ namespace WonbeLib
                                 executionPointer--;	/* unget it */
                                 val = await expr();
                                 if (bForceToReturnSuper) return;
-                                await Environment.OutputCharAsync((char)val);
+                                await Environment.OutputStringAsync($"{val}");
                             }
                             break;
                     }
