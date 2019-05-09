@@ -9,7 +9,7 @@ namespace WonbeLib
         public override async Task<string> LineInputAsync(string prompt)
         {
             await OutputStringAsync(prompt);
-            await WriteLineAsync();
+            //await WriteLineAsync();
             return await Console.In.ReadLineAsync();
         }
 

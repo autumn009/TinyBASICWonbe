@@ -158,17 +158,17 @@ namespace WonbeLib
             bForceToReturnSuper = true;
             if (executionPointer >= il.Length || lineInfos == null)
             {
-                await Environment.WriteLineAsync("{0} in ?\r\n", errorType);
+                await Environment.WriteLineAsync("{0} in ?", errorType);
                 return false;
             }
             var n = il[executionPointer].LineNumber;
             var found = lineInfos.Where(c => c.LineNumber == n).FirstOrDefault();
             if (found == null)
             {
-                await Environment.WriteLineAsync("{0} in ?\r\n", errorType);
+                await Environment.WriteLineAsync("{0} in ?", errorType);
                 return false;
             }
-            await Environment.WriteLineAsync("{0} in {1}\r\n{2}\r\n", errorType, found.LineNumber, found.SourceText);
+            await Environment.WriteLineAsync("{0} in {1}\r\n{2}", errorType, found.LineNumber, found.SourceText);
             return false;
         }
 
@@ -1026,6 +1026,7 @@ namespace WonbeLib
             for (; ; )
             {
                 dstList.Clear();
+                await Environment.WriteLineAsync("OK");
                 string s = await Environment.LineInputAsync("");
                 if (s == null) return false;
                 if (string.IsNullOrWhiteSpace(s)) continue;
