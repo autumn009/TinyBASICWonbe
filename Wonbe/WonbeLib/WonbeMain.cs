@@ -175,6 +175,7 @@ namespace WonbeLib
         bool traceFlag = false;
 
         private bool bForceToReturnSuper = false;
+        private bool bForceToExit = false;
 
         /* エラー発生 */
         private async Task<bool> reportError(string errorType)
@@ -814,6 +815,7 @@ namespace WonbeLib
         async Task st_exit()
         {
             bForceToReturnSuper = true;
+            bForceToExit = true;
             await Task.Delay(0);
         }
 
@@ -1107,6 +1109,7 @@ namespace WonbeLib
         {
             for (; ; )
             {
+                if (bForceToExit) return;
                 /* 行の開始 */
                 await processLineHeader();
                 /* 最後に達してしまった? */
@@ -1181,6 +1184,7 @@ namespace WonbeLib
             bInteractive = true;
             for (; ; )
             {
+                if (bForceToExit) return true;
                 dstList.Clear();
                 await Environment.WriteLineAsync("OK");
                 string s = await Environment.LineInputAsync("");
