@@ -72,6 +72,16 @@ namespace WonbeLib
         }
     }
 
+    public class WhitespaceWonbeInterToken : WonbeInterToken
+    {
+        public readonly string TargetString;
+        public WhitespaceWonbeInterToken(int lineNumber, string targetString)
+            : base(lineNumber)
+        {
+            this.TargetString = targetString;
+        }
+    }
+
     public class KeywordWonbeInterToken : WonbeInterToken
     {
         public readonly KeywordAssociation Assoc;
@@ -845,11 +855,15 @@ namespace WonbeLib
                 }
                 else if (item is StringWonbeInterToken)
                 {
-                    sb.Append($"\"{(item as StringWonbeInterToken).TargetString}\"");
+                    sb.Append($"{(item as StringWonbeInterToken).TargetString}");
+                }
+                else if (item is WhitespaceWonbeInterToken)
+                {
+                    sb.Append($"{(item as WhitespaceWonbeInterToken).TargetString}");
                 }
                 else if (item is LiteralWonbeInterToken)
                 {
-                    sb.Append($"{(item as LiteralWonbeInterToken).TargetString}");
+                    sb.Append($"\"{(item as LiteralWonbeInterToken).TargetString}\"");
                 }
                 else if (item is KeywordWonbeInterToken)
                 {
@@ -1007,11 +1021,17 @@ namespace WonbeLib
             for (; ; )
             {
                 if (src >= srcLine.Length) break;
-                if (srcLine[src] == ' ' || srcLine[src] == '\t')
+                int org = src;
+                for (; ; )
                 {
-                    src++;
-                    continue;
+                    if (srcLine[src] == ' ' || srcLine[src] == '\t')
+                    {
+                        src++;
+                        continue;
+                    }
+                    break;
                 }
+                if (org < src) dst.Add(new WhitespaceWonbeInterToken(lineNumber, srcLine.Substring(org, src - org)));
                 if (srcLine[src] < 0x20) return await syntaxError();
                 char next = (srcLine.Length <= src + 1) ? '\0' : srcLine[src + 1];
                 if (srcLine[src] == '0' && next == 'x')
@@ -1180,6 +1200,8 @@ namespace WonbeLib
                     lineNumber += s[src] - '0';
                     src++;
                 }
+                // skip one whitespace after line number
+                if (s[src] == ' ' || s[src] == 't') src++;
 
                 /* 中間言語に翻訳する */
                 bool b = await convertInternalCode(s.Substring(src), dstList, lineNumber);
