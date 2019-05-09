@@ -96,8 +96,8 @@ namespace WonbeLib
     {
         public int LineNumber;
         public WonbeInterToken[] InterimTokens;
+        public StoredSourcecodeLine NextLine;
     }
-
 
     public class KeywordAssociation
     {
@@ -227,6 +227,7 @@ namespace WonbeLib
             {
                 if (intermeditateExecutionPointer >= intermeditateExecitionLine.Length) return new EOLWonbeInterToken(0);
                 var token = intermeditateExecitionLine[intermeditateExecutionPointer++];
+                if (token is WhitespaceWonbeInterToken) continue;
                 var strToken = token as StringWonbeInterToken;
                 if (strToken == null) return token;
                 if (strToken.TargetString != ' ' && strToken.TargetString != '\t') return token;
@@ -955,7 +956,28 @@ namespace WonbeLib
             await Task.Delay(0);
         }
 
-        private async Task st_run() { throw new NotImplementedException(); }
+        private void setupRuntimeEnvironment()
+        {
+            StoredSourcecodeLine last = null;
+            foreach (var item in StoredSource)
+            {
+                if (last == null) continue;
+                last.NextLine = item;
+                last = item;
+                last.NextLine = null;
+            }
+            intermeditateExecitionLine = StoredSource[0].InterimTokens;
+            intermeditateExecutionPointer = 0;
+        }
+
+        private async Task st_run()
+        {
+            if (StoredSource.Count == 0) return;    // if no lines in source, do nothing
+            clearRuntimeInfo();
+            bInteractive = false;
+            setupRuntimeEnvironment();
+            await interpreterMain();
+        }
 
         private async Task st_cont() { throw new NotImplementedException(); }
         private async Task st_save() { throw new NotImplementedException(); }
