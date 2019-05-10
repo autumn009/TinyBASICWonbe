@@ -1262,13 +1262,14 @@ namespace WonbeLib
 
         private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList)
         {
+            bool requirePrompt = true;
             for (; ; )
             {
                 if (bForceToExit) return true;
                 if (!bInteractive) return false;
                 if (bForceToReturnSuper) return false;
                 dstList.Clear();
-                await Environment.WriteLineAsync("OK");
+                if(requirePrompt) await Environment.WriteLineAsync("OK");
                 string s = await Environment.LineInputAsync("");
                 if (s == null) return false;
                 if (string.IsNullOrWhiteSpace(s)) continue;
@@ -1303,6 +1304,7 @@ namespace WonbeLib
                     /* 行エディタを呼び出す */
                     await editLine(hasLineNumber, lineNumber, dstList);
                     clearRuntimeInfo();
+                    requirePrompt = false;
                 }
                 else
                 {
@@ -1310,6 +1312,7 @@ namespace WonbeLib
                     updateCurrentExecutionLine(dstList.ToArray());
                     await interpreterMain();
                     //bForceToReturnSuper = false;
+                    requirePrompt = true;
                 }
             }
         }
