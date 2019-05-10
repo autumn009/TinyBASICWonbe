@@ -148,7 +148,14 @@ namespace WonbeLib
         private List<StoredSourcecodeLine> StoredSource = new List<StoredSourcecodeLine>();
 
         /* 現在処理中の行番号 (0ならダイレクトモード) */
-        private ushort currentLineNumber;
+        private ushort currentLineNumber
+        {
+            get
+            {
+                if (CurrentExecutionLine == null) return 0;
+                return (ushort)CurrentExecutionLine.LineNumber;
+            }
+        }
 
         private Random random = new Random();
         private LineInfo[] lineInfos;
@@ -181,20 +188,15 @@ namespace WonbeLib
         /* エラー発生 */
         private async Task<bool> reportError(string errorType)
         {
+            if (bInteractive || CurrentExecutionLine == null)
+            {
+                await Environment.WriteLineAsync("{0}", errorType);
+                return false;
+            }
+            var sourceCode = decompile(CurrentExecutionLine);
+            await Environment.WriteLineAsync("{0} in {1}\r\n{2}", errorType, CurrentExecutionLine.LineNumber, sourceCode);
             bForceToReturnSuper = true;
-            if (intermeditateExecutionPointer >= intermeditateExecitionLine.Length || lineInfos == null)
-            {
-                await Environment.WriteLineAsync("{0} in ?", errorType);
-                return false;
-            }
-            var n = intermeditateExecitionLine[intermeditateExecutionPointer].LineNumber;
-            var found = lineInfos.Where(c => c.LineNumber == n).FirstOrDefault();
-            if (found == null)
-            {
-                await Environment.WriteLineAsync("{0} in ?", errorType);
-                return false;
-            }
-            await Environment.WriteLineAsync("{0} in {1}\r\n{2}", errorType, found.LineNumber, found.SourceText);
+            bInteractive = true;
             return false;
         }
 
@@ -246,26 +248,39 @@ namespace WonbeLib
         {
             for (int i = 0; i < globalVariables.Length; i++) globalVariables[i] = 0;
             for (int i = 0; i < topLevelVariables.Length; i++) topLevelVariables[i] = 0;
-            for (int i = 0; i < topLevelVariables.Length; i++) topLevelVariables[i] = 0;
-            intermeditateExecutionPointer = 0;
-            currentLineNumber = 0;
+            //for (int i = 0; i < topLevelVariables.Length; i++) topLevelVariables[i] = 0;
             localVariables = topLevelVariables;
             stackPointer = 0;
             random = new Random((int)DateTime.Now.Ticks);
+            /* Create Line Links */
+            StoredSourcecodeLine last = null;
+            foreach (var item in StoredSource)
+            {
+                if (last != null) last.NextLine = item;
+                last = item;
+                last.NextLine = null;
+            }
+            /* Init Execution pointer */
+            if (StoredSource.Count == 0)
+            {
+                CurrentExecutionLine = null;
+                intermeditateExecitionLine = null;
+            }
+            else
+            {
+                CurrentExecutionLine = StoredSource[0];
+                intermeditateExecitionLine = StoredSource[0].InterimTokens;
+            }
+            intermeditateExecutionPointer = 0;
         }
 
         /* 行頭の行番号の、実行時の定型処理 */
         async Task processLineHeader()
         {
-            if (intermeditateExecitionLine.Length <= intermeditateExecutionPointer)
-            {
-                currentLineNumber = 0;
-                return;
-            }
-            currentLineNumber = (ushort)intermeditateExecitionLine[intermeditateExecutionPointer].LineNumber;
+            // tron support
             if (traceFlag && intermeditateExecitionLine.Length > intermeditateExecutionPointer)
             {
-                await Environment.OutputStringAsync($"[{intermeditateExecitionLine[intermeditateExecutionPointer].LineNumber}]");
+                await Environment.OutputStringAsync($"[{currentLineNumber}]");
             }
         }
 
@@ -957,28 +972,12 @@ namespace WonbeLib
             await Task.Delay(0);
         }
 
-        private void setupRuntimeEnvironment()
-        {
-            StoredSourcecodeLine last = null;
-            foreach (var item in StoredSource)
-            {
-                if (last != null) last.NextLine = item;
-                last = item;
-                last.NextLine = null;
-            }
-            CurrentExecutionLine = StoredSource[0];
-            intermeditateExecitionLine = StoredSource[0].InterimTokens;
-            intermeditateExecutionPointer = 0;
-            currentLineNumber = (ushort)StoredSource[0].LineNumber;
-        }
-
         private async Task st_run()
         {
             if (StoredSource.Count == 0) return;    // if no lines in source, do nothing
             clearRuntimeInfo();
             bInteractive = false;
             bForceToReturnSuper = true;
-            setupRuntimeEnvironment();
             await Task.Delay(0);
         }
 
@@ -1218,7 +1217,6 @@ namespace WonbeLib
                     bForceToReturnSuper = true;
                     return;
                 }
-                currentLineNumber = (ushort)CurrentExecutionLine.LineNumber;
                 intermeditateExecitionLine = CurrentExecutionLine.InterimTokens;
                 intermeditateExecutionPointer = 0;
             }
