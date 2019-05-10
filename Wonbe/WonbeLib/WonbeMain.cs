@@ -191,10 +191,12 @@ namespace WonbeLib
             if (bInteractive || CurrentExecutionLine == null)
             {
                 await Environment.WriteLineAsync("{0}", errorType);
-                return false;
             }
-            var sourceCode = decompile(CurrentExecutionLine);
-            await Environment.WriteLineAsync("{0} in {1}\r\n{2}", errorType, CurrentExecutionLine.LineNumber, sourceCode);
+            else
+            {
+                var sourceCode = decompile(CurrentExecutionLine);
+                await Environment.WriteLineAsync("{0} in {1}\r\n{2}", errorType, CurrentExecutionLine.LineNumber, sourceCode);
+            }
             bForceToReturnSuper = true;
             bInteractive = true;
             return false;
@@ -1250,11 +1252,14 @@ namespace WonbeLib
                     src++;
                 }
                 // skip one whitespace after line number
-                if (s[src] == ' ' || s[src] == 't') src++;
+                if (src < s.Length)
+                {
+                    if (s[src] == ' ' || s[src] == 't') src++;
 
-                /* 中間言語に翻訳する */
-                bool b = await convertInternalCode(s.Substring(src), dstList, lineNumber);
-                if (b == false) continue;
+                    /* 中間言語に翻訳する */
+                    bool b = await convertInternalCode(s.Substring(src), dstList, lineNumber);
+                    if (b == false) continue;
+                }
                 if (bForceToReturnSuper) continue;
                 dstList.Add(new EOLWonbeInterToken(lineNumber));
                 /* 数値で開始されているか? */
