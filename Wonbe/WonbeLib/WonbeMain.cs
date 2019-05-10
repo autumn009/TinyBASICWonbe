@@ -127,8 +127,6 @@ namespace WonbeLib
     {
         private const string myVersion = "0.10";
 
-        private bool bInteractive;
-
         /* グローバル変数領域 */
         private const int NUMBER_OF_SIMPLE_VARIABLES = 'Z' - 'A' + 1;
 
@@ -182,8 +180,37 @@ namespace WonbeLib
         // トレースモード(tron/troff)
         bool traceFlag = false;
 
-        private bool bForceToReturnSuper = false;
-        private bool bForceToExit = false;
+        private bool bForceToReturnSuperImpl = false;
+        private bool bForceToExitImpl = false;
+        private bool bInteractiveImpl = true;
+        private bool bForceToReturnSuper => bForceToReturnSuperImpl;
+        private bool bForceToExit => bForceToExitImpl;
+        private bool bInteractive => bInteractiveImpl;
+
+        // モード切替
+        private void gotoInteractiveMode()
+        {
+            bInteractiveImpl = true;
+            bForceToReturnSuperImpl = true;
+            bForceToExitImpl = false;
+        }
+        private void gotoInterpreterMode()
+        {
+            bInteractiveImpl = false;
+            bForceToReturnSuperImpl = true;
+            bForceToExitImpl = false;
+        }
+        private void exitProcess()
+        {
+            bInteractiveImpl = true;
+            bForceToReturnSuperImpl = true;
+            bForceToExitImpl = true;
+        }
+        private void clearModes()
+        {
+            bForceToReturnSuperImpl = false;
+            bForceToExitImpl = false;
+        }
 
         /* エラー発生 */
         private async Task<bool> reportError(string errorType)
@@ -197,8 +224,7 @@ namespace WonbeLib
                 var sourceCode = decompile(CurrentExecutionLine);
                 await Environment.WriteLineAsync("{0} in {1}\r\n{2}", errorType, CurrentExecutionLine.LineNumber, sourceCode);
             }
-            bForceToReturnSuper = true;
-            bInteractive = true;
+            gotoInteractiveMode();
             return false;
         }
 
@@ -610,7 +636,7 @@ namespace WonbeLib
                 return;
             }
             intermeditateExecutionPointer = (int)t;
-            bInteractive = false;
+            gotoInterpreterMode();
             await processLineHeader();
         }
 
@@ -637,7 +663,7 @@ namespace WonbeLib
             localVariables = new short[NUMBER_OF_SIMPLE_VARIABLES];
             stackPointer++;
             intermeditateExecutionPointer = (int)t;
-            bInteractive = false;
+            gotoInterpreterMode();
             await processLineHeader();
         }
 
@@ -808,7 +834,7 @@ namespace WonbeLib
         /* endステートメント:　正常な終了 */
         async Task st_end()
         {
-            bForceToReturnSuper = true;
+            gotoInteractiveMode();
             await Task.Delay(0);
         }
 
@@ -833,8 +859,7 @@ namespace WonbeLib
 
         async Task st_exit()
         {
-            bForceToReturnSuper = true;
-            bForceToExit = true;
+            exitProcess();
             await Task.Delay(0);
         }
 
@@ -848,8 +873,7 @@ namespace WonbeLib
                 await paramError();
                 return;
             }
-            var task = System.Threading.Tasks.Task.Delay(val);
-            task.Wait();
+            await System.Threading.Tasks.Task.Delay(val);
         }
 
         async Task st_tron()
@@ -970,7 +994,7 @@ namespace WonbeLib
         {
             clearRuntimeInfo();
             StoredSource.Clear();
-            bForceToReturnSuper = true;
+            gotoInteractiveMode();
             await Task.Delay(0);
         }
 
@@ -978,8 +1002,7 @@ namespace WonbeLib
         {
             if (StoredSource.Count == 0) return;    // if no lines in source, do nothing
             clearRuntimeInfo();
-            bInteractive = false;
-            bForceToReturnSuper = true;
+            gotoInterpreterMode();
             await Task.Delay(0);
         }
 
@@ -1149,8 +1172,7 @@ namespace WonbeLib
                 /* 最後に達してしまった? */
                 if (!bInteractive && currentLineNumber == 0)
                 {
-                    bInteractive = true;
-                    bForceToReturnSuper = true;
+                    gotoInteractiveMode();
                     return;
                 }
 
@@ -1215,8 +1237,7 @@ namespace WonbeLib
                 CurrentExecutionLine = CurrentExecutionLine.NextLine;
                 if (CurrentExecutionLine == null)
                 {
-                    bInteractive = true;
-                    bForceToReturnSuper = true;
+                    gotoInteractiveMode();
                     return;
                 }
                 intermeditateExecitionLine = CurrentExecutionLine.InterimTokens;
@@ -1226,7 +1247,6 @@ namespace WonbeLib
 
         private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
         {
-            bInteractive = true;
             for (; ; )
             {
                 if (bForceToExit) return true;
@@ -1323,7 +1343,7 @@ namespace WonbeLib
         void do_run()
         {
             clearRuntimeInfo();
-            bInteractive = false;
+            gotoInterpreterMode();
             intermeditateExecutionPointer = 0;
         }
 
@@ -1331,7 +1351,7 @@ namespace WonbeLib
         {
             // プログラムと実行環境をリセット
             clearRuntimeInfo();
-            bInteractive = true;
+            gotoInteractiveMode();
             traceFlag = false;
         }
 
@@ -1355,21 +1375,18 @@ namespace WonbeLib
 
         internal async Task SuperMain(bool runRequest, string sourceCodeFileName)
         {
-            bInteractive = true;
             if (runRequest)
             {
                 if (await loadSource(sourceCodeFileName))
                 {
                     do_run();
-                    bInteractive = false;
+                    gotoInterpreterMode();
                 }
             }
             for (; ; )
             {
                 if (bForceToExit) return;
-                bForceToExit = false;
-                bForceToReturnSuper = false;
-                bForceToExit = false;
+                clearModes();
                 if (bInteractive)
                     await interactiveMainAsync(new List<WonbeInterToken>(), new List<LineInfo>());
                 else
