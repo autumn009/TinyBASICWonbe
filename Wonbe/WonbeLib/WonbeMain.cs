@@ -938,7 +938,7 @@ namespace WonbeLib
 
         private async Task st_list()
         {
-            int from = 0, to = 32768;
+            int from = 0, to = int.MaxValue;
             var token = skipEPToNonWhiteSpace();
             if (!token.IsEndOfStatement())
             {
@@ -993,61 +993,6 @@ namespace WonbeLib
                     to = from;  // case of "LIST [LINE_NUMBER]"
                 }
             }
-#if false
-            // TBW
-            char ch;
-            for (; ; )
-            {
-                ch = *executionPointer++;
-                if (ch != ' ' && ch != '\t') break;
-            }
-            if (ch == ':' || ch == EOL || ch == '\'')
-            {
-                executionPointer--; /* unget */
-                from = 1;
-                to = 32767;
-            }
-            else
-            {
-                if (ch == 0x01)
-                {
-                    from = *((WORD*)executionPointer);
-                    executionPointer += 2;
-                    while (TRUE)
-                    {
-                        ch = *executionPointer++;
-                        if (ch != ' ' && ch != '\t') break;
-                    }
-                }
-                else
-                {
-                    from = 1;
-                }
-                if (ch != '-')
-                {
-                    executionPointer--; /* unget */
-                    to = from;
-                }
-                else
-                {
-                    while (TRUE)
-                    {
-                        ch = *executionPointer++;
-                        if (ch != ' ' && ch != '\t') break;
-                    }
-                    if (ch == 0x01)
-                    {
-                        to = *((WORD*)executionPointer);
-                        executionPointer += 2;
-                    }
-                    else
-                    {
-                        executionPointer--; /* unget */
-                        to = 32767;
-                    }
-                }
-            }
-#endif
             await sourceDump(async (line)=>
             {
                 await Environment.WriteLineAsync(line);
