@@ -127,6 +127,7 @@ namespace WonbeLib
         /* 配列intermeditateExecitionLineのインデクス */
         private StoredSourcecodeLine currentExecutionLineImpl = null;
         private StoredSourcecodeLine CurrentExecutionLine => currentExecutionLineImpl;
+        private StoredSourcecodeLine ImmediateExcecutionModeLine { get; set; }
         private int intermeditateExecutionPointer = 0;
         private WonbeInterToken[] intermeditateExecitionLine;
 
@@ -152,7 +153,7 @@ namespace WonbeLib
         // for immediate mode
         private void updateCurrentExecutionLine(WonbeInterToken [] tokens)
         {
-            currentExecutionLineImpl = null;
+            currentExecutionLineImpl = new StoredSourcecodeLine() { InterimTokens = tokens, LineNumber = 0 };
             intermeditateExecutionPointer = 0;
             intermeditateExecitionLine = tokens;
         }
