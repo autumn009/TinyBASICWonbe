@@ -17,6 +17,12 @@ namespace WonbeLib
             var kw = this as KeywordWonbeInterToken;
             return kw != null && kw.Assoc.TargetString == name;
         }
+        public bool IsEndOfStatement()
+        {
+            if (this is EOLWonbeInterToken) return true;
+            return this is StringWonbeInterToken && GetChar() == ':';
+        }
+
         public bool IsChar(char name)
         {
             var ch = this as StringWonbeInterToken;
@@ -933,6 +939,60 @@ namespace WonbeLib
         private async Task st_list()
         {
             int from = 0, to = 32768;
+            var token = skipEPToNonWhiteSpace();
+            if (!token.IsEndOfStatement())
+            {
+                WonbeInterToken token2;
+                if (token is NumericalWonbeInterToken)
+                {
+                    from = (token as NumericalWonbeInterToken).TargetNumber;
+                    token2 = skipEPToNonWhiteSpace();
+                }
+                else if (token.GetChar() == '-')
+                {
+                    token2 = token;
+                }
+                else
+                {
+                    await syntaxError();
+                    return;
+                }
+                if (!token2.IsEndOfStatement())
+                {
+                    var sepToken = token2 as StringWonbeInterToken;
+                    if (sepToken == null)
+                    {
+                        await syntaxError();
+                        return;
+                    }
+                    if (sepToken.TargetString != '-')
+                    {
+                        await syntaxError();
+                        return;
+                    }
+                    else
+                    {
+                        var token3 = skipEPToNonWhiteSpace();
+                        if (!token3.IsEndOfStatement())
+                        {
+                            var toToken = token3 as NumericalWonbeInterToken;
+                            if (toToken == null)
+                            {
+                                await syntaxError();
+                                return;
+                            }
+                            else
+                            {
+                                to = toToken.TargetNumber;  // case of "LIST [LINE_NUMBER]-[LINE_NUMBER]"
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    to = from;  // case of "LIST [LINE_NUMBER]"
+                }
+            }
 #if false
             // TBW
             char ch;
