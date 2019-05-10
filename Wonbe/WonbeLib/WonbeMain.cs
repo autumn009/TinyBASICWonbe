@@ -832,7 +832,7 @@ namespace WonbeLib
                     return;
                 }
             }
-            intermeditateExecutionPointer = stacks[stackPointer - 1].returnPointer;
+            updateCurrentExecutionLine(stacks[stackPointer - 1].returnExecutionLine, stacks[stackPointer - 1].returnPointer);
         }
 
         /* endステートメント:　正常な終了 */
