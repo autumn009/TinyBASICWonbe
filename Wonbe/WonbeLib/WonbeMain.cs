@@ -1181,6 +1181,8 @@ namespace WonbeLib
 
                 for (; ; )
                 {
+                    if (intermeditateExecitionLine == null) break;
+                    if (intermeditateExecitionLine.Length <= intermeditateExecutionPointer) break;
                     var token = intermeditateExecitionLine[intermeditateExecutionPointer++];
                     if (token is EOLWonbeInterToken) break;
                     if (token.GetChar() == ' ' || token.GetChar() == '\t' || token.GetChar() == ':')
@@ -1236,6 +1238,12 @@ namespace WonbeLib
                     if (bForceToReturnSuper) return;
                 }
                 if (bInteractive) return;
+                /* 行が尽きたので実行を終わる */
+                if(CurrentExecutionLine == null)
+                {
+                    gotoInteractiveMode();
+                    return;
+                }
                 /* 行が尽きたので次の行に行く */
                 updateCurrentExecutionLine(CurrentExecutionLine.NextLine);
                 if (CurrentExecutionLine == null)
@@ -1293,8 +1301,7 @@ namespace WonbeLib
                 else
                 {
                     /* その行を実行する */
-                    intermeditateExecitionLine = dstList.ToArray();
-                    intermeditateExecutionPointer = 0;
+                    updateCurrentExecutionLine(dstList.ToArray());
                     await interpreterMain();
                     //bForceToReturnSuper = false;
                 }
