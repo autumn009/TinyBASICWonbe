@@ -110,19 +110,6 @@ namespace WonbeLib
         }
     }
 
-    public class LineInfo
-    {
-        public readonly int LineNumber;
-        public readonly string SourceText;
-        public readonly int IndexInIl;
-        public LineInfo(int lineNumber, string sourceText, int indexInIl)
-        {
-            this.LineNumber = lineNumber;
-            this.SourceText = sourceText;
-            this.IndexInIl = indexInIl;
-        }
-    }
-
     public class Wonbe
     {
         private const string myVersion = "0.10";
@@ -138,9 +125,37 @@ namespace WonbeLib
 
         /* 現在実行中の位置に関する情報 */
         /* 配列intermeditateExecitionLineのインデクス */
-        private StoredSourcecodeLine CurrentExecutionLine = null;
+        private StoredSourcecodeLine currentExecutionLineImpl = null;
+        private StoredSourcecodeLine CurrentExecutionLine => currentExecutionLineImpl;
         private int intermeditateExecutionPointer = 0;
         private WonbeInterToken[] intermeditateExecitionLine;
+
+        // for interpreter mode
+        private void updateCurrentExecutionLine(StoredSourcecodeLine newExecutionLine, int pointer = 0)
+        {
+            if (newExecutionLine == null)
+            {
+                // no line to execute
+                currentExecutionLineImpl = null;
+                intermeditateExecitionLine = null;
+                intermeditateExecutionPointer = 0;
+            }
+            else
+            {
+                // set line to execute 
+                currentExecutionLineImpl = newExecutionLine;
+                intermeditateExecutionPointer = pointer;
+                intermeditateExecitionLine = currentExecutionLineImpl.InterimTokens;
+            }
+        }
+
+        // for immediate mode
+        private void updateCurrentExecutionLine(WonbeInterToken [] tokens)
+        {
+            currentExecutionLineImpl = null;
+            intermeditateExecutionPointer = 0;
+            intermeditateExecitionLine = tokens;
+        }
 
         /* 保存されているソースコードの全ての行 */
         private List<StoredSourcecodeLine> StoredSource = new List<StoredSourcecodeLine>();
@@ -156,7 +171,6 @@ namespace WonbeLib
         }
 
         private Random random = new Random();
-        private LineInfo[] lineInfos;
 
         internal enum StackType { Gosub, For };
         internal struct STACK
@@ -171,7 +185,8 @@ namespace WonbeLib
             internal Action<short> setvar;	/* counter variable */
             internal Func<short> getvar;	/* counter variable */
             internal short limit;	/* limit value */
-            internal short step;		/* step value */
+            internal short step;        /* step value */
+            internal StoredSourcecodeLine returnExecutionLine;
         };
         private const int STACK_MAX = 8;
         private STACK[] stacks = new STACK[STACK_MAX];
@@ -289,17 +304,7 @@ namespace WonbeLib
                 last.NextLine = null;
             }
             /* Init Execution pointer */
-            if (StoredSource.Count == 0)
-            {
-                CurrentExecutionLine = null;
-                intermeditateExecitionLine = null;
-            }
-            else
-            {
-                CurrentExecutionLine = StoredSource[0];
-                intermeditateExecitionLine = StoredSource[0].InterimTokens;
-            }
-            intermeditateExecutionPointer = 0;
+            updateCurrentExecutionLine(StoredSource.Count == 0 ? null : StoredSource[0]);
         }
 
         /* 行頭の行番号の、実行時の定型処理 */
@@ -313,11 +318,9 @@ namespace WonbeLib
         }
 
         /* 行番号処理 */
-        int? getLineReferenceFromLineNumber(ushort lineNumber)
+        StoredSourcecodeLine getLineReferenceFromLineNumber(ushort lineNumber)
         {
-            var found = lineInfos.FirstOrDefault(c => c.LineNumber == lineNumber);
-            if (found == null) return null;
-            return found.IndexInIl;
+            return StoredSource.FirstOrDefault(c => c.LineNumber == lineNumber);
         }
 
         /* 配列管理 */
@@ -626,27 +629,25 @@ namespace WonbeLib
         async Task st_goto()
         {
             short val;
-            int? t;
             val = await expr();
             if (bForceToReturnSuper) return;
-            t = getLineReferenceFromLineNumber((ushort)val);
+            var t = getLineReferenceFromLineNumber((ushort)val);
             if (t == null)
             {
                 await lineNumberNotFound((ushort)val);
                 return;
             }
-            intermeditateExecutionPointer = (int)t;
-            gotoInterpreterMode();
+            updateCurrentExecutionLine(t);
+            if (bInteractive) gotoInterpreterMode();
             await processLineHeader();
         }
 
         async Task st_gosub()
         {
             short val;
-            int? t;
             val = await expr();
             if (bForceToReturnSuper) return;
-            t = getLineReferenceFromLineNumber((ushort)val);
+            var t = getLineReferenceFromLineNumber((ushort)val);
             if (t == null)
             {
                 await lineNumberNotFound((ushort)val);
@@ -659,11 +660,12 @@ namespace WonbeLib
             }
             stacks[stackPointer].type = StackType.Gosub;
             stacks[stackPointer].returnPointer = intermeditateExecutionPointer;
+            stacks[stackPointer].returnExecutionLine = CurrentExecutionLine;
             stacks[stackPointer].lastLocalVariables = localVariables;
             localVariables = new short[NUMBER_OF_SIMPLE_VARIABLES];
             stackPointer++;
-            intermeditateExecutionPointer = (int)t;
-            gotoInterpreterMode();
+            updateCurrentExecutionLine(t);
+            if (bInteractive) gotoInterpreterMode();
             await processLineHeader();
         }
 
@@ -679,7 +681,7 @@ namespace WonbeLib
                 stackPointer--;
                 if (stacks[stackPointer].type == StackType.Gosub) break;
             }
-            intermeditateExecutionPointer = stacks[stackPointer].returnPointer;
+            updateCurrentExecutionLine(stacks[stackPointer].returnExecutionLine, stacks[stackPointer].returnPointer);
             localVariables = stacks[stackPointer].lastLocalVariables;
         }
 
@@ -781,6 +783,7 @@ namespace WonbeLib
             }
             stacks[stackPointer].type = StackType.For;
             stacks[stackPointer].returnPointer = intermeditateExecutionPointer;
+            stacks[stackPointer].returnExecutionLine = CurrentExecutionLine;
             setvar(from);
             stacks[stackPointer].setvar = setvar;
             stacks[stackPointer].getvar = getvar;
@@ -1234,18 +1237,16 @@ namespace WonbeLib
                 }
                 if (bInteractive) return;
                 /* 行が尽きたので次の行に行く */
-                CurrentExecutionLine = CurrentExecutionLine.NextLine;
+                updateCurrentExecutionLine(CurrentExecutionLine.NextLine);
                 if (CurrentExecutionLine == null)
                 {
                     gotoInteractiveMode();
                     return;
                 }
-                intermeditateExecitionLine = CurrentExecutionLine.InterimTokens;
-                intermeditateExecutionPointer = 0;
             }
         }
 
-        private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList, List<LineInfo> lineInfos)
+        private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList)
         {
             for (; ; )
             {
@@ -1360,10 +1361,8 @@ namespace WonbeLib
             do_new();
             var reader = new StringReader(p);
             var list = new List<WonbeInterToken>();
-            var lineInfos = new List<LineInfo>();
-            await interactiveMainAsync(list, lineInfos);
+            await interactiveMainAsync(list);
             this.intermeditateExecitionLine = list.ToArray();
-            this.lineInfos = lineInfos.ToArray();
             clearRuntimeInfo();
             if (bForceToReturnSuper) return false; else return true;
         }
@@ -1388,7 +1387,7 @@ namespace WonbeLib
                 if (bForceToExit) return;
                 clearModes();
                 if (bInteractive)
-                    await interactiveMainAsync(new List<WonbeInterToken>(), new List<LineInfo>());
+                    await interactiveMainAsync(new List<WonbeInterToken>());
                 else
                     await interpreterMain();
             }
