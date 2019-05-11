@@ -28,6 +28,21 @@ namespace WonbeLib
             await Console.Out.WriteAsync(str);
         }
 
+        public override Task FilesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task SaveAsync(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task LoadAsync(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
         public override Task SetColorAsync(LanguageBaseColor color)
         {
             throw new NotImplementedException();

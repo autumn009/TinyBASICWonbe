@@ -37,6 +37,10 @@ namespace CommonLanguageInterface
         public abstract Task SetColorAsync(LanguageBaseColor color);
         public abstract Task YieldAsync();
 
+        public abstract Task SaveAsync(string filename);
+        public abstract Task LoadAsync(string filename);
+        public abstract Task FilesAsync();
+
         public async Task WriteLineAsync() => await OutputStringAsync("\r\n");
         public async Task WriteLineAsync(string msg, params object[] args)
         {
