@@ -16,11 +16,11 @@ namespace n_order
 
         static async Task Main()
         {
-            for (int i = 2; i < 6; i++)
+            for (int i = 2; i < 7; i++)
             {
                 var start = DateTimeOffset.Now;
                 await test(i);
-                Console.WriteLine($"{i}={DateTimeOffset.Now - start}");
+                Console.WriteLine($"{i}={DateTimeOffset.Now - start:d'日'hh'時間'mm'分'ss'秒'}");
             }
         }
     }
