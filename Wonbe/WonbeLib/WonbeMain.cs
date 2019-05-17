@@ -1033,7 +1033,7 @@ namespace WonbeLib
             if (bForceToReturnSuper || filename == null) return;
             if(!File.Exists(filename))
             {
-                fileNotFound();
+                await fileNotFound();
                 return;
             }
             using (var stream = await Environment.LoadAsync(filename))
