@@ -1,5 +1,6 @@
 ﻿using CommonLanguageInterface;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace WonbeLib
@@ -33,14 +34,16 @@ namespace WonbeLib
             throw new NotImplementedException();
         }
 
-        public override Task SaveAsync(string filename)
+        public override async Task<Stream> SaveAsync(string filename)
         {
-            throw new NotImplementedException();
+            await Task.Delay(0);    // dummy
+            return File.OpenWrite(filename);
         }
 
-        public override Task LoadAsync(string filename)
+        public override async Task<Stream> LoadAsync(string filename)
         {
-            throw new NotImplementedException();
+            await Task.Delay(0);    // dummy
+            return File.OpenRead(filename);
         }
 
         public override Task SetColorAsync(LanguageBaseColor color)

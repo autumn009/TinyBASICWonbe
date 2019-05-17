@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace CommonLanguageInterface
@@ -37,8 +38,8 @@ namespace CommonLanguageInterface
         public abstract Task SetColorAsync(LanguageBaseColor color);
         public abstract Task YieldAsync();
 
-        public abstract Task SaveAsync(string filename);
-        public abstract Task LoadAsync(string filename);
+        public abstract Task<Stream> SaveAsync(string filename);
+        public abstract Task<Stream> LoadAsync(string filename);
         public abstract Task FilesAsync();
 
         public async Task WriteLineAsync() => await OutputStringAsync("\r\n");

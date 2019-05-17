@@ -157,7 +157,7 @@ namespace WonbeLib
         }
 
         // for immediate mode
-        private void updateCurrentExecutionLine(WonbeInterToken [] tokens)
+        private void updateCurrentExecutionLine(WonbeInterToken[] tokens)
         {
             currentExecutionLineImpl = new StoredSourcecodeLine() { InterimTokens = tokens, LineNumber = 0 };
             intermeditateExecutionPointer = 0;
@@ -263,6 +263,7 @@ namespace WonbeLib
         {
             await reportError(string.Format("Line Number {0} not Found", lineNumber));
         }
+        private async Task fileNotFound() { await reportError("File Not Found"); }
 
         int skipToEOL(int p)
         {
@@ -993,7 +994,7 @@ namespace WonbeLib
                     to = from;  // case of "LIST [LINE_NUMBER]"
                 }
             }
-            await sourceDump(async (line)=>
+            await sourceDump(async (line) =>
             {
                 await Environment.WriteLineAsync(line);
             }, from, to);	/* リスト出力の本体を呼ぶ */
@@ -1015,9 +1016,63 @@ namespace WonbeLib
             await Task.Delay(0);
         }
 
-        private async Task st_files() { throw new NotImplementedException(); }
-        private async Task st_load() { throw new NotImplementedException(); }
+        private async Task<string> getNextFileName()
+        {
+            var token = skipEPToNonWhiteSpace() as LiteralWonbeInterToken;
+            if (token == null)
+            {
+                await syntaxError();
+                return null;
+            }
+            return token.TargetString;
+        }
+
+        private async Task st_load()
+        {
+            string filename = await getNextFileName();
+            if (bForceToReturnSuper || filename == null) return;
+            if(!File.Exists(filename))
+            {
+                fileNotFound();
+                return;
+            }
+            using (var stream = await Environment.LoadAsync(filename))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    for (; ; )
+                    {
+                        if (bForceToExit) return;
+                        if (bForceToReturnSuper) return;
+                        var s = await reader.ReadLineAsync();
+                        if (s == null) break;
+                        if (string.IsNullOrWhiteSpace(s)) continue;
+                        var dstList = new List<WonbeInterToken>();
+
+                        var r = await parseLine(s, dstList);
+                        if (r.requestToContinue) continue;
+
+                        /* 数値で開始されているか? */
+                        if (r.hasLineNumber)
+                        {
+                            /* 行エディタを呼び出す */
+                            await editLineWithoutSort(r.hasLineNumber, r.lineNumber, dstList);
+                            clearRuntimeInfo();
+                        }
+                        else
+                        {
+                            await syntaxError();
+                            return;
+                        }
+                    }
+                }
+            }
+            sortSourceLines();
+            clearRuntimeInfo();
+            gotoInteractiveMode();
+        }
         private async Task st_save() { throw new NotImplementedException(); }
+        private async Task st_files() { throw new NotImplementedException(); }
 
 
         private async Task st_cont() { throw new NotImplementedException(); }
@@ -1247,7 +1302,7 @@ namespace WonbeLib
                 }
                 if (bInteractive) return;
                 /* 行が尽きたので実行を終わる */
-                if(CurrentExecutionLine == null)
+                if (CurrentExecutionLine == null)
                 {
                     gotoInteractiveMode();
                     return;
@@ -1262,6 +1317,44 @@ namespace WonbeLib
             }
         }
 
+        class parseResult
+        {
+            internal bool hasLineNumber;
+            internal int lineNumber;
+            internal bool requestToContinue;
+        }
+
+        private async Task<parseResult> parseLine(string s, List<WonbeInterToken> dstList)
+        {
+            var r = new parseResult();
+            // 行番号だけここで解析しないと間に合わない
+            r.lineNumber = 0;
+            r.hasLineNumber = false;
+            int src = 0;
+            for (; ; )
+            {
+                if (s.Length <= src) break;
+                if (s[src] < '0' || s[src] > '9') break;
+                r.hasLineNumber = true;
+                r.lineNumber *= 10;
+                r.lineNumber += s[src] - '0';
+                src++;
+            }
+            // skip one whitespace after line number
+            if (src < s.Length)
+            {
+                if (s[src] == ' ' || s[src] == 't') src++;
+
+                /* 中間言語に翻訳する */
+                bool b = await convertInternalCode(s.Substring(src), dstList, r.lineNumber);
+                if (b == false) { r.requestToContinue = true; return r; }
+            }
+            if (bForceToReturnSuper) { r.requestToContinue = true; return r; }
+            dstList.Add(new EOLWonbeInterToken(r.lineNumber));
+            return r;
+        }
+
+
         private async Task<bool> interactiveMainAsync(List<WonbeInterToken> dstList)
         {
             bool requirePrompt = true;
@@ -1271,40 +1364,19 @@ namespace WonbeLib
                 if (!bInteractive) return false;
                 if (bForceToReturnSuper) return false;
                 dstList.Clear();
-                if(requirePrompt) await Environment.WriteLineAsync("OK");
+                if (requirePrompt) await Environment.WriteLineAsync("OK");
                 string s = await Environment.LineInputAsync("");
                 if (s == null) return false;
                 if (string.IsNullOrWhiteSpace(s)) continue;
 
-                // 行番号だけここで解析しないと間に合わない
-                int lineNumber = 0;
-                bool hasLineNumber = false;
-                int src = 0;
-                for (; ; )
-                {
-                    if (s.Length <= src) break;
-                    if (s[src] < '0' || s[src] > '9') break;
-                    hasLineNumber = true;
-                    lineNumber *= 10;
-                    lineNumber += s[src] - '0';
-                    src++;
-                }
-                // skip one whitespace after line number
-                if (src < s.Length)
-                {
-                    if (s[src] == ' ' || s[src] == 't') src++;
+                var r = await parseLine(s, dstList);
+                if (r.requestToContinue) continue;
 
-                    /* 中間言語に翻訳する */
-                    bool b = await convertInternalCode(s.Substring(src), dstList, lineNumber);
-                    if (b == false) continue;
-                }
-                if (bForceToReturnSuper) continue;
-                dstList.Add(new EOLWonbeInterToken(lineNumber));
                 /* 数値で開始されているか? */
-                if (hasLineNumber)
+                if (r.hasLineNumber)
                 {
                     /* 行エディタを呼び出す */
-                    await editLine(hasLineNumber, lineNumber, dstList);
+                    await editLine(r.hasLineNumber, r.lineNumber, dstList);
                     clearRuntimeInfo();
                     requirePrompt = false;
                 }
@@ -1319,8 +1391,18 @@ namespace WonbeLib
             }
         }
 
-        private async Task editLine(bool hasLineNumber, int lineNumber, List<WonbeInterToken> dstList)
+        private void sortSourceLines()
         {
+            // sort all lines by line number
+            StoredSource.Sort((x, y) =>
+            {
+                return x.LineNumber - y.LineNumber;
+            });
+        }
+
+        private async Task editLineWithoutSort(bool hasLineNumber, int lineNumber, List<WonbeInterToken> dstList)
+        {
+
             var foundLine = StoredSource.FirstOrDefault(c => c.LineNumber == lineNumber);
             if (foundLine == null)
             {
@@ -1351,11 +1433,12 @@ namespace WonbeLib
                     foundLine.InterimTokens = dstList.ToArray();
                 }
             }
-            // sort all lines by line number
-            StoredSource.Sort((x, y) =>
-            {
-                return x.LineNumber - y.LineNumber;
-            });
+        }
+
+        private async Task editLine(bool hasLineNumber, int lineNumber, List<WonbeInterToken> dstList)
+        {
+            await editLineWithoutSort(hasLineNumber, lineNumber, dstList);
+            sortSourceLines();
         }
 
         /* プログラムの実行開始 */
