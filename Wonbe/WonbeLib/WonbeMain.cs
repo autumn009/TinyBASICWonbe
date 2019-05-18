@@ -1024,7 +1024,7 @@ namespace WonbeLib
 
         private bool isResourcePath(string s) => s.ToLower().StartsWith("res:");
 
-        private async Task loadAndRunCommon(string filename, bool runAfterLoad)
+        private async Task loadAndRunCommon(string filename)
         {
             Stream stream = null;
             if (isResourcePath(filename))
@@ -1083,7 +1083,7 @@ namespace WonbeLib
         {
             string filename = await getNextFileName();
             if (bForceToReturnSuper || filename == null) return;
-            await loadAndRunCommon(filename, false);
+            await loadAndRunCommon(filename);
         }
         private async Task st_run()
         {
@@ -1093,7 +1093,9 @@ namespace WonbeLib
             {
                 if (token is LiteralWonbeInterToken)
                 {
-                    await loadAndRunCommon((token as LiteralWonbeInterToken).TargetString, true);
+                    await loadAndRunCommon((token as LiteralWonbeInterToken).TargetString);
+                    clearRuntimeInfo(startLine);
+                    gotoInterpreterMode();
                     return;
                 }
                 else if (token is NumericalWonbeInterToken)
