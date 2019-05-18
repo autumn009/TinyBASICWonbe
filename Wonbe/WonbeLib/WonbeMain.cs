@@ -1052,6 +1052,8 @@ namespace WonbeLib
                 await fileNotFound();
                 return;
             }
+            clearRuntimeInfo();
+            StoredSource.Clear();
             using (stream)
             {
                 using (var reader = new StreamReader(stream))
@@ -1084,7 +1086,6 @@ namespace WonbeLib
                 }
             }
             sortSourceLines();
-            clearRuntimeInfo();
             gotoInteractiveMode();
         }
         private async Task st_save()
