@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLanguageInterface;
+using System.Reflection;
 
 namespace WonbeLib
 {
@@ -1027,16 +1028,33 @@ namespace WonbeLib
             return token.TargetString;
         }
 
+        private bool isResourcePath(string s) => s.ToLower().StartsWith("res:");
+
         private async Task st_load()
         {
             string filename = await getNextFileName();
             if (bForceToReturnSuper || filename == null) return;
-            if(!File.Exists(filename))
+            Stream stream = null;
+            if (isResourcePath(filename))
             {
-                await fileNotFound();
-                return;
+                stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WonbeLib." + filename.Substring
+                    (4)+ ".wb");
+                if( stream == null)
+                {
+                    await fileNotFound();
+                    return;
+                }
             }
-            using (var stream = await Environment.LoadAsync(filename))
+            else
+            {
+                if (!File.Exists(filename))
+                {
+                    await fileNotFound();
+                    return;
+                }
+                stream = await Environment.LoadAsync(filename);
+            }
+            using (stream)
             {
                 using (var reader = new StreamReader(stream))
                 {

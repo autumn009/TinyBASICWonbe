@@ -5,6 +5,42 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="colordemo.wb" />
+    <None Remove="ctb.wb" />
+    <None Remove="janken.wb" />
+    <None Remove="shoot.wb" />
+    <None Remove="star.wb" />
+    <None Remove="test.wb" />
+    <None Remove="testcall.wb" />
+    <None Remove="testcont.wb" />
+    <None Remove="testfor.wb" />
+    <None Remove="testgosub.wb" />
+    <None Remove="testif.wb" />
+    <None Remove="testint.wb" />
+    <None Remove="testlocate.wb" />
+    <None Remove="testlongloop.wb" />
+    <None Remove="testpeekpoke.wb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="colordemo.wb" />
+    <EmbeddedResource Include="ctb.wb" />
+    <EmbeddedResource Include="janken.wb" />
+    <EmbeddedResource Include="shoot.wb" />
+    <EmbeddedResource Include="star.wb" />
+    <EmbeddedResource Include="test.wb" />
+    <EmbeddedResource Include="testcall.wb" />
+    <EmbeddedResource Include="testcont.wb" />
+    <EmbeddedResource Include="testfor.wb" />
+    <EmbeddedResource Include="testgosub.wb" />
+    <EmbeddedResource Include="testif.wb" />
+    <EmbeddedResource Include="testint.wb" />
+    <EmbeddedResource Include="testlocate.wb" />
+    <EmbeddedResource Include="testlongloop.wb" />
+    <EmbeddedResource Include="testpeekpoke.wb" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CommonLanguageInterface\CommonLanguageInterface.csproj" />
   </ItemGroup>
 
