@@ -265,6 +265,7 @@ namespace WonbeLib
             await reportError(string.Format("Line Number {0} not Found", lineNumber));
         }
         private async Task fileNotFound() { await reportError("File Not Found"); }
+        private async Task canNotSave() { await reportError("Can Not Save"); }
 
         int skipToEOL(int p)
         {
@@ -1086,7 +1087,34 @@ namespace WonbeLib
             clearRuntimeInfo();
             gotoInteractiveMode();
         }
-        private async Task st_save() { throw new NotImplementedException(); }
+        private async Task st_save()
+        {
+            string filename = await getNextFileName();
+            if (bForceToReturnSuper || filename == null) return;
+            if (isResourcePath(filename))
+            {
+                await paramError();
+                return;
+            }
+            if (!Path.HasExtension(filename)) filename = filename + ".wb";
+            Stream stream = await Environment.SaveAsync(filename);
+            if (stream == null)
+            {
+                await canNotSave();
+                return;
+            }
+            using (stream)
+            {
+                using (var writer = new StreamWriter(stream))
+                {
+                    await sourceDump(async (line) =>
+                    {
+                        await writer.WriteLineAsync(line);
+                    }, int.MinValue, int.MaxValue);	/* リスト出力の本体を呼ぶ */
+                }
+            }
+        }
+
         private async Task st_files() { throw new NotImplementedException(); }
 
 
