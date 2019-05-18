@@ -29,21 +29,32 @@ namespace WonbeLib
             await Console.Out.WriteAsync(str);
         }
 
+        private void setCurrentDirectory()
+        {
+            Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+        }
+
         public override Task FilesAsync()
         {
+            setCurrentDirectory();
             throw new NotImplementedException();
         }
 
         public override async Task<Stream> SaveAsync(string filename)
         {
             await Task.Delay(0);    // dummy
+            setCurrentDirectory();
             return File.OpenWrite(filename);
         }
 
         public override async Task<Stream> LoadAsync(string filename)
         {
             await Task.Delay(0);    // dummy
-            return File.OpenRead(filename);
+            setCurrentDirectory();
+            if (File.Exists(filename))
+                return File.OpenRead(filename);
+            else
+                return null;
         }
 
         public override Task SetColorAsync(LanguageBaseColor color)

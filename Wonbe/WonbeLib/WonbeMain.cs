@@ -1040,20 +1040,16 @@ namespace WonbeLib
                 filename = filename.Substring(4);
                 if (!Path.HasExtension(filename)) filename = filename + ".wb";
                 stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WonbeLib." + filename);
-                if( stream == null)
-                {
-                    await fileNotFound();
-                    return;
-                }
             }
             else
             {
-                if (!File.Exists(filename))
-                {
-                    await fileNotFound();
-                    return;
-                }
+                if (!Path.HasExtension(filename)) filename = filename + ".wb";
                 stream = await Environment.LoadAsync(filename);
+            }
+            if (stream == null)
+            {
+                await fileNotFound();
+                return;
             }
             using (stream)
             {
