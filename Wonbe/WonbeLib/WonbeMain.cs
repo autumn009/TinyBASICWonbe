@@ -1228,7 +1228,8 @@ namespace WonbeLib
                     var sb = new StringBuilder();
                     for (; ; )
                     {
-                        if( src >= srcLine.Length) return await syntaxError();
+                        //if( src >= srcLine.Length) return await syntaxError();
+                        if (src >= srcLine.Length) break;
                         char v = srcLine[src++];
                         if (v == '"') break;
                         sb.Append(v);
