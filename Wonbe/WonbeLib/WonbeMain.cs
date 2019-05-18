@@ -1108,7 +1108,7 @@ namespace WonbeLib
                         }
                     }
                 }
-                else
+                else if (!(token is EOLWonbeInterToken))
                 {
                     await syntaxError();
                     return;
