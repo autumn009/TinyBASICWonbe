@@ -1213,8 +1213,8 @@ namespace WonbeLib
                     var sb = new StringBuilder();
                     for (; ; )
                     {
+                        if( src >= srcLine.Length) return await syntaxError();
                         char v = srcLine[src++];
-                        if (v == '\0') return await syntaxError();
                         if (v == '"') break;
                         sb.Append(v);
                     }
