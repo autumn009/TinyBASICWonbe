@@ -1037,8 +1037,9 @@ namespace WonbeLib
             Stream stream = null;
             if (isResourcePath(filename))
             {
-                stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WonbeLib." + filename.Substring
-                    (4)+ ".wb");
+                filename = filename.Substring(4);
+                if (!Path.HasExtension(filename)) filename = filename + ".wb";
+                stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WonbeLib." + filename);
                 if( stream == null)
                 {
                     await fileNotFound();
