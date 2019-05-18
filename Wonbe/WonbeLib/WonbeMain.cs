@@ -297,7 +297,7 @@ namespace WonbeLib
         }
 
         /* 実行時情報のクリア (contできなくなる) */
-        void clearRuntimeInfo()
+        void clearRuntimeInfo(StoredSourcecodeLine line = null)
         {
             for (int i = 0; i < globalVariables.Length; i++) globalVariables[i] = 0;
             for (int i = 0; i < topLevelVariables.Length; i++) topLevelVariables[i] = 0;
@@ -314,7 +314,8 @@ namespace WonbeLib
                 last.NextLine = null;
             }
             /* Init Execution pointer */
-            updateCurrentExecutionLine(StoredSource.Count == 0 ? null : StoredSource[0]);
+            if (line == null) line = StoredSource.Count == 0 ? null : StoredSource[0];
+            updateCurrentExecutionLine(line);
         }
 
         /* 行頭の行番号の、実行時の定型処理 */
@@ -1010,14 +1011,6 @@ namespace WonbeLib
             await Task.Delay(0);
         }
 
-        private async Task st_run()
-        {
-            if (StoredSource.Count == 0) return;    // if no lines in source, do nothing
-            clearRuntimeInfo();
-            gotoInterpreterMode();
-            await Task.Delay(0);
-        }
-
         private async Task<string> getNextFileName()
         {
             var token = skipEPToNonWhiteSpace() as LiteralWonbeInterToken;
@@ -1031,10 +1024,8 @@ namespace WonbeLib
 
         private bool isResourcePath(string s) => s.ToLower().StartsWith("res:");
 
-        private async Task st_load()
+        private async Task loadAndRunCommon(string filename, bool runAfterLoad)
         {
-            string filename = await getNextFileName();
-            if (bForceToReturnSuper || filename == null) return;
             Stream stream = null;
             if (isResourcePath(filename))
             {
@@ -1088,6 +1079,46 @@ namespace WonbeLib
             sortSourceLines();
             gotoInteractiveMode();
         }
+        private async Task st_load()
+        {
+            string filename = await getNextFileName();
+            if (bForceToReturnSuper || filename == null) return;
+            await loadAndRunCommon(filename, false);
+        }
+        private async Task st_run()
+        {
+            StoredSourcecodeLine startLine = null;
+            var token = skipEPToNonWhiteSpace();
+            if (token != null)
+            {
+                if (token is LiteralWonbeInterToken)
+                {
+                    await loadAndRunCommon((token as LiteralWonbeInterToken).TargetString, true);
+                    return;
+                }
+                else if (token is NumericalWonbeInterToken)
+                {
+                    int n = (token as NumericalWonbeInterToken).TargetNumber;
+                    foreach (var item in StoredSource)
+                    {
+                        if (item.LineNumber == n)
+                        {
+                            startLine = item;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    await syntaxError();
+                    return;
+                }
+            }
+            if (StoredSource.Count == 0) return;    // if no lines in source, do nothing
+            clearRuntimeInfo(startLine);
+            gotoInterpreterMode();
+        }
+
         private async Task st_save()
         {
             string filename = await getNextFileName();
