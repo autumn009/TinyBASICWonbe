@@ -411,6 +411,8 @@ namespace WonbeLib
                 return t;
             }
             if (token.IsKeyword("tick")) return (short)(DateTime.Now.Ticks / 10);
+            if (token.IsKeyword("textwidth")) return (short)await Environment.GetTextWidthAsync();
+            if (token.IsKeyword("textheight")) return (short)await Environment.GetTextHeightAsync();
             if (token is NumericalWonbeInterToken)
             {
                 return (short)(token as NumericalWonbeInterToken).TargetNumber;
@@ -1349,6 +1351,8 @@ namespace WonbeLib
                     new KeywordAssociation("rnd"),
                     new KeywordAssociation("abs"),
                     new KeywordAssociation("tick"),
+                    new KeywordAssociation("textwidth"),
+                    new KeywordAssociation("textheight"),
                     new KeywordAssociation("then"),
                     new KeywordAssociation("chr"),
                     new KeywordAssociation("to"),

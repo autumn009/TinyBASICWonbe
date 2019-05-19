@@ -133,6 +133,18 @@ namespace WonbeLib
             Console.Clear();
             await Task.Delay(0);    // dummy
         }
+
+        public async override Task<int> GetTextWidthAsync()
+        {
+            await Task.Delay(0);    // dummy
+            return Console.BufferWidth;
+        }
+
+        public async override Task<int> GetTextHeightAsync()
+        {
+            await Task.Delay(0);    // dummy
+            return Console.BufferHeight;
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

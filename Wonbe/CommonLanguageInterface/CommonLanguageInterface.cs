@@ -44,6 +44,8 @@ namespace CommonLanguageInterface
         public abstract Task<LanguageBaseColor> SetForeColorAsync(LanguageBaseColor color);
         public abstract Task<LanguageBaseColor> SetBackColorAsync(LanguageBaseColor color);
         public abstract Task ClearScreen();
+        public abstract Task<int> GetTextWidthAsync();
+        public abstract Task<int> GetTextHeightAsync();
 
         public abstract Task YieldAsync();
 
