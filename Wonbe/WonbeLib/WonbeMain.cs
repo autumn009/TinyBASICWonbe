@@ -137,6 +137,9 @@ namespace WonbeLib
         private StoredSourcecodeLine ImmediateExcecutionModeLine { get; set; }
         private int intermeditateExecutionPointer = 0;
         private WonbeInterToken[] intermeditateExecitionLine;
+        /* cont用情報 */
+        private StoredSourcecodeLine resumeLine { get; set; }
+        private int resumeExecutionPointer = 0;
 
         // for interpreter mode
         private void updateCurrentExecutionLine(StoredSourcecodeLine newExecutionLine, int pointer = 0)
@@ -259,13 +262,20 @@ namespace WonbeLib
         private async Task nextWithoutFor() { await reportError("Next without For"); }
         private async Task outOfMemory() { await reportError("Out of memory"); }
         private async Task paramError() { await reportError("Parameter Error"); }
-        private async Task breakBySatement() { await reportError("Break"); }
         private async Task lineNumberNotFound(ushort lineNumber)
         {
             await reportError(string.Format("Line Number {0} not Found", lineNumber));
         }
         private async Task fileNotFound() { await reportError("File Not Found"); }
         private async Task canNotSave() { await reportError("Can Not Save"); }
+        private async Task cantContinue() { await reportError("Can't Continue"); }
+        private async Task breakMessage(ushort lineNumber)
+        {
+            if (lineNumber == 0)
+                await Environment.OutputStringAsync($"Break\r\n");
+            else
+                await Environment.OutputStringAsync($"Break in {lineNumber}\r\n");
+        }
 
         int skipToEOL(int p)
         {
@@ -316,6 +326,9 @@ namespace WonbeLib
             /* Init Execution pointer */
             if (line == null) line = StoredSource.Count == 0 ? null : StoredSource[0];
             updateCurrentExecutionLine(line);
+            // clear cont info
+            resumeLine = null;
+            resumeExecutionPointer = 0;
         }
 
         /* 行頭の行番号の、実行時の定型処理 */
@@ -855,7 +868,14 @@ namespace WonbeLib
         /* breakステートメント:　デバッグ用の中断 */
         async Task st_break()
         {
-            await breakBySatement();
+            if (currentLineNumber > 0)
+            {
+                resumeLine = currentExecutionLineImpl;
+                resumeExecutionPointer = intermeditateExecutionPointer;
+            }
+            await breakMessage(currentLineNumber);
+            gotoInteractiveMode();
+            await Task.Delay(0);
         }
 
         async Task st_rem()
@@ -1206,7 +1226,16 @@ namespace WonbeLib
             if (pos != 0) await Environment.OutputStringAsync("\r\n");
         }
 
-        private async Task st_cont() { throw new NotImplementedException(); }
+        private async Task st_cont()
+        {
+            if (resumeLine == null || !bInteractive)
+            {
+                await cantContinue();
+                return;
+            }
+            updateCurrentExecutionLine(resumeLine, resumeExecutionPointer);
+            gotoInterpreterMode();
+        }
         private async Task st_debug() { throw new NotImplementedException(); }
         private async Task st_locate() { throw new NotImplementedException(); }
         private async Task st_cls() { throw new NotImplementedException(); }
