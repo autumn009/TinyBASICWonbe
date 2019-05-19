@@ -1276,7 +1276,18 @@ namespace WonbeLib
 
         private async Task st_backcolor() => await colorCommon(async (c) => await Environment.SetBackColorAsync(c));
 
-        private async Task st_locate() { throw new NotImplementedException(); }
+        private async Task st_locate()
+        {
+            int x, y;
+            x = await expr();
+            if (bForceToReturnSuper) return;
+            await skipComma();
+            if (bForceToReturnSuper) return;
+            y = await expr();
+            if (bForceToReturnSuper) return;
+            bool r = await Environment.LocateAsync(x, y);
+            if (r == false) await paramError();
+        }
         private async Task st_cls() { throw new NotImplementedException(); }
         private async Task st_waitvb() { throw new NotImplementedException(); }
         private async Task st_play() { throw new NotImplementedException(); }

@@ -40,7 +40,7 @@ namespace CommonLanguageInterface
         public abstract Task OutputStringAsync(string str);
         public abstract Task DebugOutputStringAsync(string str);
         public abstract Task OutputCharAsync(char ch);
-        public abstract Task LocateAsync(int x, int y);
+        public abstract Task<bool> LocateAsync(int x, int y);
         public abstract Task<LanguageBaseColor> SetForeColorAsync(LanguageBaseColor color);
         public abstract Task<LanguageBaseColor> SetBackColorAsync(LanguageBaseColor color);
         public abstract Task YieldAsync();

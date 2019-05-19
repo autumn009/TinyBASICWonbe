@@ -16,9 +16,15 @@ namespace WonbeLib
             return await Console.In.ReadLineAsync();
         }
 
-        public override Task LocateAsync(int x, int y)
+        public async override Task<bool> LocateAsync(int x, int y)
         {
-            throw new NotImplementedException();
+            if (x < 0) return false;
+            if (y < 0) return false;
+            if (x >= Console.BufferWidth) return false;
+            if (y >= Console.BufferHeight) return false;
+            Console.SetCursorPosition(x, y);
+            await Task.Delay(0);    // dummy
+            return true;
         }
 
         public override async Task OutputCharAsync(char ch)
