@@ -43,6 +43,8 @@ namespace CommonLanguageInterface
         public abstract Task<bool> LocateAsync(int x, int y);
         public abstract Task<LanguageBaseColor> SetForeColorAsync(LanguageBaseColor color);
         public abstract Task<LanguageBaseColor> SetBackColorAsync(LanguageBaseColor color);
+        public abstract Task ClearScreen();
+
         public abstract Task YieldAsync();
 
         public abstract Task<Stream> SaveAsync(string filename);

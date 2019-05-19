@@ -1288,7 +1288,11 @@ namespace WonbeLib
             bool r = await Environment.LocateAsync(x, y);
             if (r == false) await paramError();
         }
-        private async Task st_cls() { throw new NotImplementedException(); }
+        private async Task st_cls() {
+            await Environment.ClearScreen();
+        }
+
+
         private async Task st_waitvb() { throw new NotImplementedException(); }
         private async Task st_play() { throw new NotImplementedException(); }
 

@@ -128,6 +128,11 @@ namespace WonbeLib
 
         public override async Task YieldAsync() => await Task.FromResult(false);
 
+        public async override Task ClearScreen()
+        {
+            Console.Clear();
+            await Task.Delay(0);    // dummy
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase
