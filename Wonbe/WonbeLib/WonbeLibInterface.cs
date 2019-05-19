@@ -1,5 +1,7 @@
 ﻿using CommonLanguageInterface;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -29,15 +31,30 @@ namespace WonbeLib
             await Console.Out.WriteAsync(str);
         }
 
-        private void setCurrentDirectory()
-        {
-            Directory.SetCurrentDirectory(Environment.GetFolderPath(Environment.SpecialFolder.Personal));
-        }
+        private string getCurrentDirectory() => Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+        private void setCurrentDirectory() => Directory.SetCurrentDirectory(getCurrentDirectory());
 
-        public override Task FilesAsync()
+        public override async Task<IEnumerable<string>> FilesAsync(string path)
         {
-            setCurrentDirectory();
-            throw new NotImplementedException();
+            await Task.Delay(0);    // dummy
+            try
+            {
+                if (path == null) path = getCurrentDirectory();
+                if (Directory.Exists(path)) return Directory.EnumerateFiles(path, "*.wb");
+                var dirpart = Path.GetDirectoryName(path);
+                var namepart = Path.GetFileName(path);
+                if (!Path.HasExtension(namepart)) namepart = namepart + ".wb";
+                if (namepart.IndexOf('*') >= 0 || namepart.IndexOf('?') >= 0) return Directory.EnumerateFiles(dirpart, namepart);
+            }
+            catch (FileNotFoundException)
+            {
+                // nop
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // nop
+            }
+            return null;    // directory not found
         }
 
         public override async Task<Stream> SaveAsync(string filename)

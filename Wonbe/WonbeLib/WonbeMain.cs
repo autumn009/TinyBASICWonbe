@@ -1154,8 +1154,44 @@ namespace WonbeLib
             }
         }
 
-        private async Task st_files() { throw new NotImplementedException(); }
-
+        private async Task st_files()
+        {
+            string path = null;
+            var token = skipEPToNonWhiteSpace();
+            if (token != null)
+            {
+                if (token is LiteralWonbeInterToken)
+                {
+                    path = (token as LiteralWonbeInterToken).TargetString;
+                }
+                else if (!(token is EOLWonbeInterToken))
+                {
+                    await syntaxError();
+                    return;
+                }
+            }
+            var e = await Environment.FilesAsync(path);
+            if (e == null)
+            {
+                await paramError();
+                return;
+            }
+            int pos = 0;
+            foreach (var item in e)
+            {
+                var name = Path.GetFileName(item);
+                var spaces = 9 - name.Length % 8;
+                var s = name + new string(' ', spaces);
+                if (pos + s.Length > 80)
+                {
+                    await Environment.OutputStringAsync("\r\n");
+                    pos = 0;
+                }
+                await Environment.OutputStringAsync(s);
+                pos += s.Length;
+            }
+            if (pos != 0) await Environment.OutputStringAsync("\r\n");
+        }
 
         private async Task st_cont() { throw new NotImplementedException(); }
         private async Task st_debug() { throw new NotImplementedException(); }

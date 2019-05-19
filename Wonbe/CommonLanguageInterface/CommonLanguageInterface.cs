@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -40,7 +41,7 @@ namespace CommonLanguageInterface
 
         public abstract Task<Stream> SaveAsync(string filename);
         public abstract Task<Stream> LoadAsync(string filename);
-        public abstract Task FilesAsync();
+        public abstract Task<IEnumerable<string>> FilesAsync(string path);
 
         public async Task WriteLineAsync() => await OutputStringAsync("\r\n");
         public async Task WriteLineAsync(string msg, params object[] args)
