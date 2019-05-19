@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CommonLanguageInterface
 {
-    public struct LanguageBaseColor
+    public class LanguageBaseColor
     {
         public byte R, G, B, A;
         public LanguageBaseColor(byte r, byte g, byte b, byte a = 255)
@@ -14,6 +14,10 @@ namespace CommonLanguageInterface
             G = g;
             B = b;
             A = a;
+        }
+        public LanguageBaseColor()
+        {
+            A = 255;
         }
     }
 
@@ -37,7 +41,8 @@ namespace CommonLanguageInterface
         public abstract Task DebugOutputStringAsync(string str);
         public abstract Task OutputCharAsync(char ch);
         public abstract Task LocateAsync(int x, int y);
-        public abstract Task SetColorAsync(LanguageBaseColor color);
+        public abstract Task<LanguageBaseColor> SetForeColorAsync(LanguageBaseColor color);
+        public abstract Task<LanguageBaseColor> SetBackColorAsync(LanguageBaseColor color);
         public abstract Task YieldAsync();
 
         public abstract Task<Stream> SaveAsync(string filename);

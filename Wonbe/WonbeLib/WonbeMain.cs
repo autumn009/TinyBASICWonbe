@@ -1239,11 +1239,47 @@ namespace WonbeLib
             updateCurrentExecutionLine(resumeLine, resumeExecutionPointer);
             gotoInterpreterMode();
         }
+
+        private async Task skipComma()
+        {
+            var t = skipEPToNonWhiteSpace() as StringWonbeInterToken;
+            if (t == null || t.TargetString != ',') await syntaxError();
+        }
+
+        private async Task colorCommon(Func<LanguageBaseColor, Task> setColor)
+        {
+            int r, g, b, a = 255;
+            r = await expr();
+            if (bForceToReturnSuper) return;
+            await skipComma();
+            if (bForceToReturnSuper) return;
+            g = await expr();
+            if (bForceToReturnSuper) return;
+            await skipComma();
+            if (bForceToReturnSuper) return;
+            b = await expr();
+            if (bForceToReturnSuper) return;
+            var t = skipEPToNonWhiteSpace() as StringWonbeInterToken;
+            if (t != null && t.TargetString == ',')
+            {
+                a = await expr();
+                if (bForceToReturnSuper) return;
+            }
+            else
+            {
+                intermeditateExecutionPointer--;    // unget token
+            }
+            await setColor(new LanguageBaseColor((byte)r, (byte)g, (byte)b, (byte)a));
+        }
+
+        private async Task st_color() => await colorCommon(async (c) => await Environment.SetForeColorAsync(c));
+
+        private async Task st_backcolor() => await colorCommon(async (c) => await Environment.SetBackColorAsync(c));
+
         private async Task st_locate() { throw new NotImplementedException(); }
         private async Task st_cls() { throw new NotImplementedException(); }
         private async Task st_waitvb() { throw new NotImplementedException(); }
         private async Task st_play() { throw new NotImplementedException(); }
-        private async Task st_color() { throw new NotImplementedException(); }
 
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
         {
@@ -1290,6 +1326,7 @@ namespace WonbeLib
                     new KeywordAssociation("files",st_files),
                     new KeywordAssociation("play",st_play),
                     new KeywordAssociation("color",st_color),
+                    new KeywordAssociation("backcolor",st_backcolor),
                     new KeywordAssociation("and"),
                     new KeywordAssociation("or"),
                     new KeywordAssociation("xor"),

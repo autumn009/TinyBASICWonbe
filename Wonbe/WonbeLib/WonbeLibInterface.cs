@@ -85,9 +85,39 @@ namespace WonbeLib
                 return null;
         }
 
-        public override Task SetColorAsync(LanguageBaseColor color)
+        private LanguageBaseColor consoleColorToLanguageBaseColor(ConsoleColor cc)
         {
-            throw new NotImplementedException();
+            var r = new LanguageBaseColor();
+            if (((int)cc & 1) != 0) r.B = 255;
+            if (((int)cc & 2) != 0) r.R = 255;
+            if (((int)cc & 4) != 0) r.G = 255;
+            r.A = 255;
+            return r;
+        }
+
+        private ConsoleColor languageBaseColorToConsoleColor(LanguageBaseColor lgb)
+        {
+            int r = 0;
+            if (lgb.B != 0) r |= 1;
+            if (lgb.R != 0) r |= 2;
+            if (lgb.G != 0) r |= 4;
+            return (ConsoleColor)r;
+        }
+
+        public async override Task<LanguageBaseColor> SetForeColorAsync(LanguageBaseColor color)
+        {
+            await Task.Delay(0);    // dummy
+            var old = Console.ForegroundColor;
+            if (color != null) Console.ForegroundColor = languageBaseColorToConsoleColor(color);
+            return consoleColorToLanguageBaseColor(old);
+        }
+
+        public async override Task<LanguageBaseColor> SetBackColorAsync(LanguageBaseColor color)
+        {
+            await Task.Delay(0);    // dummy
+            var old = Console.BackgroundColor;
+            if (color != null) Console.BackgroundColor = languageBaseColorToConsoleColor(color);
+            return consoleColorToLanguageBaseColor(old);
         }
 
         public override async Task YieldAsync() => await Task.FromResult(false);
