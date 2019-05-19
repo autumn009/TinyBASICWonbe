@@ -1024,7 +1024,7 @@ namespace WonbeLib
 
         private bool isResourcePath(string s) => s.ToLower().StartsWith("res:");
 
-        private async Task loadAndRunCommon(string filename)
+        private async Task loadAndRunCommon(string filename, bool requireNew = true)
         {
             Stream stream = null;
             if (isResourcePath(filename))
@@ -1044,7 +1044,7 @@ namespace WonbeLib
                 return;
             }
             clearRuntimeInfo();
-            StoredSource.Clear();
+            if (requireNew) StoredSource.Clear();
             using (stream)
             {
                 using (var reader = new StreamReader(stream))
@@ -1079,12 +1079,17 @@ namespace WonbeLib
             sortSourceLines();
             gotoInteractiveMode();
         }
-        private async Task st_load()
+        private async Task loadAndMergeCommon(bool requireNew)
         {
             string filename = await getNextFileName();
             if (bForceToReturnSuper || filename == null) return;
-            await loadAndRunCommon(filename);
+            await loadAndRunCommon(filename, requireNew);
         }
+
+        private async Task st_load() => await loadAndMergeCommon(true);
+
+        private async Task st_merge() => await loadAndMergeCommon(false);
+
         private async Task st_run()
         {
             StoredSourcecodeLine startLine = null;
@@ -1153,7 +1158,6 @@ namespace WonbeLib
 
 
         private async Task st_cont() { throw new NotImplementedException(); }
-        private async Task st_merge() { throw new NotImplementedException(); }
         private async Task st_debug() { throw new NotImplementedException(); }
         private async Task st_locate() { throw new NotImplementedException(); }
         private async Task st_cls() { throw new NotImplementedException(); }
