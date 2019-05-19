@@ -31,6 +31,11 @@ namespace WonbeLib
             await Console.Out.WriteAsync(str);
         }
 
+        public override async Task DebugOutputStringAsync(string str)
+        {
+            await Console.Out.WriteAsync($"[DEBUG MESSAGE:{str}]");
+        }
+
         private string getCurrentDirectory() => Environment.GetFolderPath(Environment.SpecialFolder.Personal);
         private void setCurrentDirectory() => Directory.SetCurrentDirectory(getCurrentDirectory());
 
@@ -80,6 +85,7 @@ namespace WonbeLib
         }
 
         public override async Task YieldAsync() => await Task.FromResult(false);
+
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

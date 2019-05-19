@@ -34,6 +34,7 @@ namespace CommonLanguageInterface
     {
         public abstract Task<string> LineInputAsync(string prompt);
         public abstract Task OutputStringAsync(string str);
+        public abstract Task DebugOutputStringAsync(string str);
         public abstract Task OutputCharAsync(char ch);
         public abstract Task LocateAsync(int x, int y);
         public abstract Task SetColorAsync(LanguageBaseColor color);

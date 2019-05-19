@@ -592,7 +592,7 @@ namespace WonbeLib
             setter(val);
         }
 
-        async Task st_print()
+        async Task printOrDebug(Func<char,Task> outputChar, Func<string, Task> outputString, Func<Task> outputNewLine)
         {
             char lastChar = '\0';
             for (; ; )
@@ -615,13 +615,13 @@ namespace WonbeLib
 
                 if (token is LiteralWonbeInterToken)
                 {
-                    await Environment.OutputStringAsync((token as LiteralWonbeInterToken).TargetString);
+                    await outputString((token as LiteralWonbeInterToken).TargetString);
                 }
                 else if (token.IsKeyword("chr"))
                 {
                     ushort val = (ushort)await expr();
                     if (bForceToReturnSuper) return;
-                    await Environment.OutputCharAsync((char)val);
+                    await outputChar((char)val);
                 }
                 else
                 {
@@ -630,7 +630,7 @@ namespace WonbeLib
                         case ';':
                             break;
                         case ',':
-                            await Environment.OutputCharAsync('\t');
+                            await outputChar('\t');
                             break;
                         default:
                             {
@@ -638,7 +638,7 @@ namespace WonbeLib
                                 intermeditateExecutionPointer--;	/* unget it */
                                 val = await expr();
                                 if (bForceToReturnSuper) return;
-                                await Environment.OutputStringAsync($"{val}");
+                                await outputString($"{val}");
                             }
                             break;
                     }
@@ -646,9 +646,12 @@ namespace WonbeLib
             }
             if (lastChar != ';' && lastChar != ',')
             {
-                await Environment.WriteLineAsync();
+                await outputNewLine();
             }
         }
+
+        private async Task st_debug() => await printOrDebug((ch) => Environment.DebugOutputStringAsync(ch.ToString()), Environment.DebugOutputStringAsync, () => Environment.DebugOutputStringAsync("\r\n"));
+        private async Task st_print() => await printOrDebug(Environment.OutputCharAsync, Environment.OutputStringAsync, () => Environment.WriteLineAsync());
 
         async Task st_goto()
         {
@@ -1236,7 +1239,6 @@ namespace WonbeLib
             updateCurrentExecutionLine(resumeLine, resumeExecutionPointer);
             gotoInterpreterMode();
         }
-        private async Task st_debug() { throw new NotImplementedException(); }
         private async Task st_locate() { throw new NotImplementedException(); }
         private async Task st_cls() { throw new NotImplementedException(); }
         private async Task st_waitvb() { throw new NotImplementedException(); }
@@ -1272,7 +1274,7 @@ namespace WonbeLib
                     new KeywordAssociation("rem",st_rem),
                     new KeywordAssociation("randomize",st_randomize),
                     new KeywordAssociation("exit",st_exit),
-                    new KeywordAssociation("debug",st_print),
+                    new KeywordAssociation("debug",st_debug),
                     new KeywordAssociation("waitms",st_waitms),
                     new KeywordAssociation("tron",st_tron),
                     new KeywordAssociation("troff",st_troff),
@@ -1284,7 +1286,6 @@ namespace WonbeLib
                     new KeywordAssociation("save",st_save),
                     new KeywordAssociation("load",st_load),
                     new KeywordAssociation("merge",st_merge),
-                    new KeywordAssociation("debug",st_debug),
                     new KeywordAssociation("waitvb",st_waitvb),
                     new KeywordAssociation("files",st_files),
                     new KeywordAssociation("play",st_play),
