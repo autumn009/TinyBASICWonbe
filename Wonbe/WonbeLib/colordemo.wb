@@ -1,3 +1,4 @@
+5 cls
 10 print "default"
 20 color 255,0,0:print "red"
 30 color 0,255,0:print "blue"
@@ -13,4 +14,9 @@
 110 color 255,255,255,0:print "transparent (Not Work in Console Ver)"
 120 color 255,255,255
 130 backcolor 0,0,0
-140 print "end"
+300 rem
+400 locate rnd(textwidth),rnd(textheight)
+410 rem color rnd(1)*255,rnd(1)*255,rnd(1)*255
+420 rem backcolor rnd(1)*255,rnd(1)*255,rnd(1)*255
+430 print chr(rnd(26)+64)
+900 goto 300
