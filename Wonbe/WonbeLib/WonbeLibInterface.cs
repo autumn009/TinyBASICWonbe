@@ -33,7 +33,13 @@ namespace WonbeLib
 
         public override async Task DebugOutputStringAsync(string str)
         {
-            await Console.Out.WriteAsync($"[DEBUG MESSAGE:{str}]");
+            var oldFore = Console.ForegroundColor;
+            var oldBack = Console.BackgroundColor;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Red;
+            await Console.Out.WriteAsync(str);
+            Console.ForegroundColor = oldFore;
+            Console.BackgroundColor = oldBack;
         }
 
         private string getCurrentDirectory() => Environment.GetFolderPath(Environment.SpecialFolder.Personal);
