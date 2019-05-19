@@ -1170,11 +1170,24 @@ namespace WonbeLib
                     return;
                 }
             }
-            var e = await Environment.FilesAsync(path);
-            if (e == null)
+            IEnumerable<string> e = null;
+            if (path != null && isResourcePath(path))
             {
-                await paramError();
-                return;
+                if (path.Length != 4)    // "res:" only
+                {
+                    await paramError();
+                    return;
+                }
+                e = Assembly.GetExecutingAssembly().GetManifestResourceNames().Select(c => c.Substring("WonbeLib.".Length));
+            }
+            else
+            {
+                e = await Environment.FilesAsync(path);
+                if (e == null)
+                {
+                    await paramError();
+                    return;
+                }
             }
             int pos = 0;
             foreach (var item in e)
