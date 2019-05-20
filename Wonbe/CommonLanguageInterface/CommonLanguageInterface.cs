@@ -46,6 +46,7 @@ namespace CommonLanguageInterface
         public abstract Task ClearScreen();
         public abstract Task<int> GetTextWidthAsync();
         public abstract Task<int> GetTextHeightAsync();
+        public abstract Task BeepAsync();
 
         public abstract Task YieldAsync();
 

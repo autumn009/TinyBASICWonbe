@@ -152,6 +152,12 @@ namespace Wonbe
             await Task.Delay(0);    // dummy
             return Console.BufferHeight;
         }
+
+        public async override Task BeepAsync()
+        {
+            await Task.Delay(0);    // dummy
+            Console.Beep();
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

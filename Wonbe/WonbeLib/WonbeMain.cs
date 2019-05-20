@@ -242,6 +242,7 @@ namespace WonbeLib
         /* エラー発生 */
         private async Task<bool> reportError(string errorType)
         {
+            await Environment.BeepAsync();
             if (bInteractive || CurrentExecutionLine == null)
             {
                 await Environment.WriteLineAsync("{0}", errorType);
@@ -1335,6 +1336,10 @@ namespace WonbeLib
                  }
              });
         }
+        private async Task st_beep()
+        {
+            await Environment.BeepAsync();
+        }
 
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
         {
@@ -1380,6 +1385,7 @@ namespace WonbeLib
                     new KeywordAssociation("waitvb",st_waitvb),
                     new KeywordAssociation("files",st_files),
                     new KeywordAssociation("play",st_play),
+                    new KeywordAssociation("beep",st_beep),
                     new KeywordAssociation("color",st_color),
                     new KeywordAssociation("backcolor",st_backcolor),
                     new KeywordAssociation("and"),
