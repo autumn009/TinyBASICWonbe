@@ -110,7 +110,7 @@ namespace WonbeLib
             int max = Math.Max(lgb.B, Math.Max(lgb.G, lgb.R));
             if (max < 256 / 3) r = 0;
             else if (max < 256 / 3 * 2)
-            { /* do nothis */ }
+            { /* do nothing */ }
             else r += 8;
             return (ConsoleColor)r;
         }
