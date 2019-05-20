@@ -9,6 +9,7 @@ namespace Wonbe
     {
         static async Task Main(string[] args)
         {
+            Console.CancelKeyPress += (sender, e) => e.Cancel = true;
             Console.WriteLine($"*** Welcome, {WonbeLib.Wonbe.GetMyName()} Command Line ***");
             var info = new LanguageBaseStartInfo();
             info.CommandLine = Environment.CommandLine;
