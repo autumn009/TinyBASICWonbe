@@ -1294,8 +1294,17 @@ namespace WonbeLib
             await Environment.ClearScreen();
         }
 
-
-        private async Task st_waitvb() { throw new NotImplementedException(); }
+        private async Task st_waitvb()
+        {
+            int val = await expr();
+            if (bForceToReturnSuper) return;
+            if (val < 0 || val > 750)
+            {
+                await paramError();
+                return;
+            }
+            await Task.Delay(val * 10);
+        }
         private async Task st_play() { throw new NotImplementedException(); }
 
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
