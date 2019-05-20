@@ -104,10 +104,14 @@ namespace WonbeLib
         private ConsoleColor languageBaseColorToConsoleColor(LanguageBaseColor lgb)
         {
             int r = 0;
-            if (lgb.B >= 128) r |= 1;
-            if (lgb.G >= 128) r |= 2;
-            if (lgb.R >= 128) r |= 4;
-            if (lgb.B + lgb.G + lgb.R > 256 * 3 / 2) r += 8;
+            if (lgb.B >= 256 / 3) r |= 1;
+            if (lgb.G >= 256 / 3) r |= 2;
+            if (lgb.R >= 256 / 3) r |= 4;
+            int max = Math.Max(lgb.B, Math.Max(lgb.G, lgb.R));
+            if (max < 256 / 3) r = 0;
+            else if (max < 256 / 3 * 2)
+            { /* do nothis */ }
+            else r += 8;
             return (ConsoleColor)r;
         }
 
