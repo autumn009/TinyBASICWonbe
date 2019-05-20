@@ -162,9 +162,9 @@ namespace Wonbe
 
     public class WonbeLanguageBase : AbastractLanguageBase
     {
-        public override async Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo)
+        public override async Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo, Func<bool> breakFlagGetter, Action<bool> breakFlagSetter)
         {
-            var instance = new WonbeLib.Wonbe(Environment);
+            var instance = new WonbeLib.Wonbe(Environment, breakFlagGetter, breakFlagSetter);
             await instance.SuperMain(startInfo.RunRequest, startInfo.SourceCodeFileName);
         }
 

@@ -63,7 +63,7 @@ namespace CommonLanguageInterface
     }
     public abstract class AbastractLanguageBase
     {
-        public abstract Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo);
+        public abstract Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo, Func<bool> breakFlagGetter, Action<bool> breakFlagSetter );
         public abstract Task InvokeCompilerAsync(LanguageBaseStartInfo startInfo);
         public LanguageBaseEnvironmentInfo Environment { get; set; }
     }

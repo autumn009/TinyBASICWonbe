@@ -122,6 +122,9 @@ namespace WonbeLib
     {
         private const string myVersion = "0.10";
 
+        private readonly Func<bool> breakFlagGetter;
+        private readonly Action<bool> breakFlagSetter;
+
         /* グローバル変数領域 */
         private const int NUMBER_OF_SIMPLE_VARIABLES = 'Z' - 'A' + 1;
 
@@ -273,6 +276,7 @@ namespace WonbeLib
         private async Task cantContinue() { await reportError("Can't Continue"); }
         private async Task breakMessage(ushort lineNumber)
         {
+            await Environment.BeepAsync();
             if (lineNumber == 0)
                 await Environment.OutputStringAsync($"Break\r\n");
             else
@@ -1567,6 +1571,19 @@ namespace WonbeLib
                     if (intermeditateExecitionLine.Length <= intermeditateExecutionPointer) break;
                     var token = intermeditateExecitionLine[intermeditateExecutionPointer++];
                     if (token is EOLWonbeInterToken) break;
+                    // Ctrl+C pressed
+                    if (breakFlagGetter())
+                    {
+                        breakFlagSetter(false);
+                        if (currentLineNumber > 0)
+                        {
+                            resumeLine = currentExecutionLineImpl;
+                            resumeExecutionPointer = intermeditateExecutionPointer;
+                        }
+                        await breakMessage(currentLineNumber);
+                        gotoInteractiveMode();
+                        return;
+                    }
                     if (token.GetChar() == ' ' || token.GetChar() == '\t' || token.GetChar() == ':')
                     {
                         /* nop */
@@ -1679,6 +1696,7 @@ namespace WonbeLib
             bool requirePrompt = true;
             for (; ; )
             {
+                breakFlagSetter(false);
                 if (bForceToExit) return true;
                 if (!bInteractive) return false;
                 if (bForceToReturnSuper) return false;
@@ -1812,6 +1830,11 @@ namespace WonbeLib
                     await interpreterMain();
             }
         }
-        public Wonbe(LanguageBaseEnvironmentInfo Environment) => this.Environment = Environment;
+        public Wonbe(LanguageBaseEnvironmentInfo Environment, Func<bool> breakFlagGetter, Action<bool> breakFlagSetter)
+        {
+            this.Environment = Environment;
+            this.breakFlagGetter = breakFlagGetter;
+            this.breakFlagSetter = breakFlagSetter;
+        }
     }
 }

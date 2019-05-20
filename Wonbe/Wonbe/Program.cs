@@ -7,9 +7,9 @@ namespace Wonbe
 {
     class Program
     {
+        internal static bool IsCanceled { get; set; } = false;
         static async Task Main(string[] args)
         {
-            Console.CancelKeyPress += (sender, e) => e.Cancel = true;
             Console.WriteLine($"*** Welcome, {WonbeLib.Wonbe.GetMyName()} Command Line ***");
             var info = new LanguageBaseStartInfo();
             info.CommandLine = Environment.CommandLine;
@@ -18,7 +18,12 @@ namespace Wonbe
             var env = new WonbeEnviroment();
             var b = new WonbeLanguageBase();
             b.Environment = env;
-            await b.InvokeInterpreterAsync(info);
+            Console.CancelKeyPress += async (sender, e) =>
+            {
+                IsCanceled = true;
+                e.Cancel = true;
+            };
+            await b.InvokeInterpreterAsync(info, ()=>IsCanceled, (b)=>IsCanceled = b);
         }
     }
 }
