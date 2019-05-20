@@ -1244,11 +1244,13 @@ namespace WonbeLib
             gotoInterpreterMode();
         }
 
-        private async Task skipComma()
+        private async Task skipChar(char ch)
         {
             var t = skipEPToNonWhiteSpace() as StringWonbeInterToken;
-            if (t == null || t.TargetString != ',') await syntaxError();
+            if (t == null || t.TargetString != ch) await syntaxError();
         }
+
+        private async Task skipComma() => await skipChar(',');
 
         private async Task colorCommon(Func<LanguageBaseColor, Task> setColor)
         {
@@ -1341,6 +1343,61 @@ namespace WonbeLib
             await Environment.BeepAsync();
         }
 
+        private async Task st_input()
+        {
+            string prompt = "";
+            var token = skipEPToNonWhiteSpace();
+            if (token is LiteralWonbeInterToken)
+            {
+                prompt = (token as LiteralWonbeInterToken).TargetString;
+                await skipChar(';');
+                if (bForceToReturnSuper) return;
+                token = skipEPToNonWhiteSpace();
+            }
+            if (token is StringWonbeInterToken)
+            {
+                if (token.GetChar() == '@')
+                {   /* is it l-value? */
+                    int? pvar;
+                    pvar = await getArrayReference();
+                    if (pvar == null) return;
+                    await inputSub(c => { array[(int)pvar] = c; });
+                    return;
+                }
+                else if (token.IsCharInRange('A', 'Z'))
+                {
+                    await inputSub(c =>
+                    {
+                        globalVariables[token.GetChar() - 'A'] = c;
+                    });
+                    return;
+                }
+                else if (token.IsCharInRange('a', 'z'))
+                {
+                    await inputSub(c =>
+                    {
+                        localVariables[token.GetChar() - 'a'] = c;
+                    });
+                    return;
+                }
+            }
+            await syntaxError();
+
+            async Task inputSub(Action<short> act)
+            {
+                for (; ; )
+                {
+                    var s = await Environment.LineInputAsync(prompt + "? ");
+                    if (s != null && short.TryParse(s.Trim(), out short r))
+                    {
+                        act(r);
+                        return;
+                    }
+                    await Environment.OutputStringAsync("Re-Enter\r\n");
+                }
+            }
+        }
+
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
         {
             foreach (var n in assocTable)
@@ -1374,6 +1431,7 @@ namespace WonbeLib
                     new KeywordAssociation("waitms",st_waitms),
                     new KeywordAssociation("tron",st_tron),
                     new KeywordAssociation("troff",st_troff),
+                    new KeywordAssociation("input",st_input),
 
                     new KeywordAssociation("new",st_new),
                     new KeywordAssociation("list",st_list),
