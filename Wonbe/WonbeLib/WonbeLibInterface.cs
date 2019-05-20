@@ -104,9 +104,10 @@ namespace WonbeLib
         private ConsoleColor languageBaseColorToConsoleColor(LanguageBaseColor lgb)
         {
             int r = 0;
-            if (lgb.B != 0) r |= 1;
-            if (lgb.R != 0) r |= 2;
-            if (lgb.G != 0) r |= 4;
+            if (lgb.B >= 128) r |= 1;
+            if (lgb.G >= 128) r |= 2;
+            if (lgb.R >= 128) r |= 4;
+            if (lgb.B + lgb.G + lgb.R > 256 * 3 / 2) r += 8;
             return (ConsoleColor)r;
         }
 

@@ -15,8 +15,11 @@
 120 color 255,255,255
 130 backcolor 0,0,0
 300 rem
-400 locate rnd(textwidth),rnd(textheight)
-410 rem color rnd(1)*255,rnd(1)*255,rnd(1)*255
-420 rem backcolor rnd(1)*255,rnd(1)*255,rnd(1)*255
-430 print chr(rnd(26)+64)
-900 goto 300
+310 x = textwidth:y = textheight
+320 if x > 80 then x = 80
+330 if y > 24 then y = 24
+400 locate rnd(x),rnd(y)
+410 color rnd(256),rnd(256),rnd(256)
+420 backcolor rnd(256),rnd(256),rnd(256)
+430 print chr(rnd(26)+64);
+900 goto 400
