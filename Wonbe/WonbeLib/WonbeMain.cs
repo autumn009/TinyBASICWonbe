@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommonLanguageInterface;
 using System.Reflection;
+using NAudio.Wave;
 
 namespace WonbeLib
 {
@@ -1305,7 +1306,35 @@ namespace WonbeLib
             }
             await Task.Delay(val * 10);
         }
-        private async Task st_play() { throw new NotImplementedException(); }
+        private async Task st_play()
+        {
+            var token = skipEPToNonWhiteSpace() as LiteralWonbeInterToken;
+            if (token == null)
+            {
+                await syntaxError();
+                return;
+            }
+            _ = Task.Run(async () =>
+             {
+                 try
+                 {
+                     using (var mf = new MediaFoundationReader(token.TargetString))
+                     using (var wo = new WaveOutEvent())
+                     {
+                         wo.Init(mf);
+                         wo.Play();
+                         while (wo.PlaybackState == PlaybackState.Playing)
+                         {
+                             await Task.Delay(500);
+                         }
+                     }
+                 }
+                 catch (FileNotFoundException)
+                 {
+                     await Environment.OutputStringAsync("[Playback Error]");
+                 }
+             });
+        }
 
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
         {
