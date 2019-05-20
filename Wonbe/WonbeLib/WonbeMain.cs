@@ -1699,7 +1699,7 @@ namespace WonbeLib
             return "Wonbe 2019 Ver " + myVersion;
         }
 
-        internal async Task SuperMain(bool runRequest, string sourceCodeFileName)
+        public async Task SuperMain(bool runRequest, string sourceCodeFileName)
         {
             if (runRequest)
             {

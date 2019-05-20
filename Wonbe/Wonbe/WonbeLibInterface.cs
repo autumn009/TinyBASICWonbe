@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace WonbeLib
+namespace Wonbe
 {
     public class WonbeEnviroment : LanguageBaseEnvironmentInfo
     {
@@ -158,7 +158,7 @@ namespace WonbeLib
     {
         public override async Task InvokeInterpreterAsync(LanguageBaseStartInfo startInfo)
         {
-            var instance = new Wonbe(Environment);
+            var instance = new WonbeLib.Wonbe(Environment);
             await instance.SuperMain(startInfo.RunRequest, startInfo.SourceCodeFileName);
         }
 
