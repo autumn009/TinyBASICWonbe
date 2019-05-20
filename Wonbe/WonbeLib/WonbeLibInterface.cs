@@ -94,9 +94,11 @@ namespace WonbeLib
         private LanguageBaseColor consoleColorToLanguageBaseColor(ConsoleColor cc)
         {
             var r = new LanguageBaseColor();
-            if (((int)cc & 1) != 0) r.B = 255;
-            if (((int)cc & 2) != 0) r.R = 255;
-            if (((int)cc & 4) != 0) r.G = 255;
+            byte v;
+            if ((int)cc >= 8) v = 255; else v = 128;
+            if (((int)cc & 1) != 0) r.B = v;
+            if (((int)cc & 2) != 0) r.G = v;
+            if (((int)cc & 4) != 0) r.R = v;
             r.A = 255;
             return r;
         }
