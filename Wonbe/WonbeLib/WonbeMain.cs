@@ -1569,8 +1569,6 @@ namespace WonbeLib
                 {
                     if (intermeditateExecitionLine == null) break;
                     if (intermeditateExecitionLine.Length <= intermeditateExecutionPointer) break;
-                    var token = intermeditateExecitionLine[intermeditateExecutionPointer++];
-                    if (token is EOLWonbeInterToken) break;
                     // Ctrl+C pressed
                     if (breakFlagGetter())
                     {
@@ -1584,6 +1582,8 @@ namespace WonbeLib
                         gotoInteractiveMode();
                         return;
                     }
+                    var token = intermeditateExecitionLine[intermeditateExecutionPointer++];
+                    if (token is EOLWonbeInterToken) break;
                     if (token.GetChar() == ' ' || token.GetChar() == '\t' || token.GetChar() == ':')
                     {
                         /* nop */
