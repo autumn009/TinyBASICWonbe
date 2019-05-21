@@ -438,6 +438,7 @@ namespace WonbeLib
             if (token.IsKeyword("textwidth")) return (short)await Environment.GetTextWidthAsync();
             if (token.IsKeyword("textheight")) return (short)await Environment.GetTextHeightAsync();
             if (token.IsKeyword("keywait")) return (short)await Environment.GetKeyWaitAsync();
+            if (token.IsKeyword("keyscan")) return (short)await Environment.GetKeyScanAsync();
             if (token is NumericalWonbeInterToken)
             {
                 return (short)(token as NumericalWonbeInterToken).TargetNumber;
@@ -1477,6 +1478,7 @@ namespace WonbeLib
                     new KeywordAssociation("textwidth"),
                     new KeywordAssociation("textheight"),
                     new KeywordAssociation("keywait"),
+                    new KeywordAssociation("keyscan"),
                     new KeywordAssociation("then"),
                     new KeywordAssociation("chr"),
                     new KeywordAssociation("to"),

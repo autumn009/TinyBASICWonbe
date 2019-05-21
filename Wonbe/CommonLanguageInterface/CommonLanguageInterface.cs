@@ -62,6 +62,7 @@ namespace CommonLanguageInterface
         }
 
         public abstract Task<short> GetKeyWaitAsync();
+        public abstract Task<short> GetKeyScanAsync();
     }
     public abstract class AbastractLanguageBase
     {

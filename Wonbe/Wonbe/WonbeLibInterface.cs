@@ -165,6 +165,14 @@ namespace Wonbe
             var r = Console.ReadKey(true);
             return (short)r.Key;
         }
+
+        public async override Task<short> GetKeyScanAsync()
+        {
+            if (!Console.KeyAvailable) return 0;
+            var r = Console.ReadKey(true);
+            await Task.Delay(0);    // dummy
+            return (short)r.Key;
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

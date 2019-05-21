@@ -1,0 +1,3 @@
+﻿10 cls:locate 0,0:print "scancode:";keyscan;";"
+15 waitvb 3
+20 goto 10
