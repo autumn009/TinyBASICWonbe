@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wonbe", "Wonbe\Wonbe.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WonbeLib", "WonbeLib\WonbeLib.csproj", "{A4308A64-DBB4-4421-A769-556136BED34C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonLanguageInterface", "CommonLanguageInterface\CommonLanguageInterface.csproj", "{C743D16A-6E68-45C0-8AF4-D358CCCCF036}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLanguageInterface", "CommonLanguageInterface\CommonLanguageInterface.csproj", "{C743D16A-6E68-45C0-8AF4-D358CCCCF036}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonbeFW", "WonbeFW\WonbeFW.csproj", "{080963DE-5000-4CF2-B814-93F70D656B22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{C743D16A-6E68-45C0-8AF4-D358CCCCF036}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C743D16A-6E68-45C0-8AF4-D358CCCCF036}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C743D16A-6E68-45C0-8AF4-D358CCCCF036}.Release|Any CPU.Build.0 = Release|Any CPU
+		{080963DE-5000-4CF2-B814-93F70D656B22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{080963DE-5000-4CF2-B814-93F70D656B22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{080963DE-5000-4CF2-B814-93F70D656B22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{080963DE-5000-4CF2-B814-93F70D656B22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
