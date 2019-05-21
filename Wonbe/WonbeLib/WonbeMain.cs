@@ -144,6 +144,24 @@ namespace WonbeLib
         /* cont用情報 */
         private StoredSourcecodeLine resumeLine { get; set; }
         private int resumeExecutionPointer = 0;
+        private LanguageBaseColor resumeForeColor { get; set; }
+        private LanguageBaseColor resumeBackColor { get; set; }
+
+        private async Task setResumeInfo()
+        {
+            if (currentLineNumber > 0)
+            {
+                resumeLine = currentExecutionLineImpl;
+                resumeExecutionPointer = intermeditateExecutionPointer;
+            }
+            else
+            {
+                resumeLine = null;
+                resumeExecutionPointer = 0;
+            }
+            resumeForeColor = await Environment.SetForeColorAsync(new LanguageBaseColor(255, 255, 255));
+            resumeForeColor = await Environment.SetBackColorAsync(new LanguageBaseColor(0, 0, 0));
+        }
 
         // for interpreter mode
         private void updateCurrentExecutionLine(StoredSourcecodeLine newExecutionLine, int pointer = 0)
@@ -879,11 +897,7 @@ namespace WonbeLib
         /* breakステートメント:　デバッグ用の中断 */
         async Task st_break()
         {
-            if (currentLineNumber > 0)
-            {
-                resumeLine = currentExecutionLineImpl;
-                resumeExecutionPointer = intermeditateExecutionPointer;
-            }
+            await setResumeInfo();
             await breakMessage(currentLineNumber);
             gotoInteractiveMode();
             await Task.Delay(0);
@@ -1245,6 +1259,8 @@ namespace WonbeLib
                 return;
             }
             updateCurrentExecutionLine(resumeLine, resumeExecutionPointer);
+            await Environment.SetForeColorAsync(resumeForeColor);
+            await Environment.SetBackColorAsync(resumeBackColor);
             gotoInterpreterMode();
         }
 
@@ -1573,11 +1589,7 @@ namespace WonbeLib
                     if (breakFlagGetter())
                     {
                         breakFlagSetter(false);
-                        if (currentLineNumber > 0)
-                        {
-                            resumeLine = currentExecutionLineImpl;
-                            resumeExecutionPointer = intermeditateExecutionPointer;
-                        }
+                        await setResumeInfo();
                         await breakMessage(currentLineNumber);
                         gotoInteractiveMode();
                         return;
