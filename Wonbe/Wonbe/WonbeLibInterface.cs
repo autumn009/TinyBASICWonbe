@@ -158,6 +158,13 @@ namespace Wonbe
             await Task.Delay(0);    // dummy
             Console.Beep();
         }
+
+        public async override Task<short> GetKeyWaitAsync()
+        {
+            await Task.Delay(0);    // dummy
+            var r = Console.ReadKey(true);
+            return (short)r.Key;
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

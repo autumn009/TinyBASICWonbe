@@ -1,0 +1,2 @@
+﻿10 print keywait
+20 goto 10

@@ -17,6 +17,7 @@
     <None Remove="testgosub.wb" />
     <None Remove="testif.wb" />
     <None Remove="testint.wb" />
+    <None Remove="testkeywait.wb" />
     <None Remove="testlocate.wb" />
     <None Remove="testlongloop.wb" />
     <None Remove="testpeekpoke.wb" />
@@ -35,6 +36,7 @@
     <EmbeddedResource Include="testgosub.wb" />
     <EmbeddedResource Include="testif.wb" />
     <EmbeddedResource Include="testint.wb" />
+    <EmbeddedResource Include="testkeywait.wb" />
     <EmbeddedResource Include="testlocate.wb" />
     <EmbeddedResource Include="testlongloop.wb" />
     <EmbeddedResource Include="testpeekpoke.wb" />

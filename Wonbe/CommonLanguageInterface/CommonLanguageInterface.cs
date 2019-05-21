@@ -60,6 +60,8 @@ namespace CommonLanguageInterface
             await OutputStringAsync(string.Format(msg, args));
             await WriteLineAsync();
         }
+
+        public abstract Task<short> GetKeyWaitAsync();
     }
     public abstract class AbastractLanguageBase
     {
