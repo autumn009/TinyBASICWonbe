@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace WonbeFW
 {
@@ -172,6 +173,12 @@ namespace WonbeFW
             var r = Console.ReadKey(true);
             await Task.Delay(0);    // dummy
             return (short)r.Key;
+        }
+
+        public async override Task<bool> GetKeyDownAsync(int keycode)
+        {
+            await Task.Delay(0);    // dummy
+            return (Keyboard.GetKeyStates((Key)keycode) & KeyStates.Down) > 0;
         }
     }
 

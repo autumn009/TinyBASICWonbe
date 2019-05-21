@@ -173,6 +173,11 @@ namespace Wonbe
             await Task.Delay(0);    // dummy
             return (short)r.Key;
         }
+
+        public override Task<bool> GetKeyDownAsync(int keycode)
+        {
+            throw new NotImplementedException("GetKeyDownAsync is not supported in .NET Core Console Runner");
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

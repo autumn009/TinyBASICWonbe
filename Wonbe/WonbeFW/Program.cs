@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CommonLanguageInterface;
 using WonbeLib;
@@ -8,7 +9,8 @@ namespace WonbeFW
     class Program
     {
         internal static bool IsCanceled { get; set; } = false;
-        static async Task Main(string[] args)
+        [STAThread]
+        static void Main(string[] args)
         {
             Console.WriteLine($"*** Welcome, {WonbeLib.Wonbe.GetMyName()} Command Line ***");
             var info = new LanguageBaseStartInfo();
@@ -23,7 +25,8 @@ namespace WonbeFW
                 IsCanceled = true;
                 e.Cancel = true;
             };
-            await b.InvokeInterpreterAsync(info, () => IsCanceled, (v) => IsCanceled = v);
+            _= b.InvokeInterpreterAsync(info, () => IsCanceled, (v) => IsCanceled = v);
+            //Thread.Sleep(10000);
         }
     }
 }
