@@ -621,7 +621,7 @@ namespace WonbeLib
             setter(val);
         }
 
-        async Task printOrDebug(Func<char,Task> outputChar, Func<string, Task> outputString, Func<Task> outputNewLine)
+        async Task printOrDebug(Func<char, Task> outputChar, Func<string, Task> outputString, Func<Task> outputNewLine)
         {
             char lastChar = '\0';
             for (; ; )
@@ -657,10 +657,10 @@ namespace WonbeLib
                     switch (token.GetChar())
                     {
                         case ';':
-                            break;
+                            continue;
                         case ',':
                             await outputChar('\t');
-                            break;
+                            continue;
                         default:
                             {
                                 short val;
@@ -672,6 +672,27 @@ namespace WonbeLib
                             break;
                     }
                 }
+                var tokenSep = skipEPToNonWhiteSpace();
+                if (tokenSep is EOLWonbeInterToken) break;
+                var strTokenSep = tokenSep as StringWonbeInterToken;
+                if (strTokenSep != null) 
+                {
+                    lastChar = strTokenSep.TargetString;
+                    switch (strTokenSep.GetChar())
+                    {
+                        case ';':
+                            continue;
+                        case ',':
+                            await outputChar('\t');
+                            continue;
+                        case ':':
+                            goto exit;
+                    }
+                    await syntaxError();
+                    return;
+                }
+                exit:
+                intermeditateExecutionPointer--;    /* unget it */
             }
             if (lastChar != ';' && lastChar != ',')
             {
