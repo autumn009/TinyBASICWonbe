@@ -9,7 +9,6 @@ namespace WonbeFW
     class Program
     {
         internal static bool IsCanceled { get; set; } = false;
-        [STAThread]
         static void Main(string[] args)
         {
             AutoResetEvent termEvent = new AutoResetEvent(false);
@@ -31,7 +30,6 @@ namespace WonbeFW
                         e.Cancel = true;
                     };
                     await b.InvokeInterpreterAsync(info, () => IsCanceled, (v) => IsCanceled = v);
-                    //Thread.Sleep(10000);
                 }
                 finally
                 {
