@@ -1,22 +1,22 @@
 100 cls:gosub 17000 'オープニング
 1000 cls
-1010 print "┏━━━━━━━━━┳━━━━━━━┳━━━━━━━━┓";
-1020 print "┃　１２３４５６７８┃　　　　　　　┃　　　　　　　　┃";
-1030 print "┃１　　　　　　　　┃ＥＮＥＲＧＹ　┃　　　ジャンプ　┃";
-1040 print "┃２　　　　　　　　┃　　　　　　　┃　　　　　　　　┃";
-1050 print "┃３　　　　　　　　┃ＭＩＳＳＩＬＥ┃　　　バーニア　┃";
-1060 print "┃４　　　　　　　　┃　　　　　　　┃　　　　　　　　┃";
-1070 print "┃５　　　　　　　　┃ＬＥＦＴ　　　┃　　　ウェーブ　┃";
-1080 print "┃６　　　　　　　　┃　　　　　　　┃　　　　　　　　┃";
-1090 print "┃７　　　　　　　　┃ＤＡＹ　　　　┃　　　ミサイル　┃";
-1100 print "┃８　　　　　　　　┃　　　　　　　┃　　　　　　　　┃";
-1110 print "┣━━━━━━━━━┻━━━━━━━┻━━━━━━━━┫";
-1120 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃";
-1130 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃";
-1140 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃";
-1150 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃";
-1160 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃";
-1170 print "┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛";
+1010 print "┏━━━━━━━━━┳━━━━━━━┳━━━━━━━━┓"
+1020 print "┃　１２３４５６７８┃　　　　　　　┃　　　　　　　　┃"
+1030 print "┃１　　　　　　　　┃ＥＮＥＲＧＹ　┃　　　ジャンプ　┃"
+1040 print "┃２　　　　　　　　┃　　　　　　　┃　　　　　　　　┃"
+1050 print "┃３　　　　　　　　┃ＭＩＳＳＩＬＥ┃　　　バーニア　┃"
+1060 print "┃４　　　　　　　　┃　　　　　　　┃　　　　　　　　┃"
+1070 print "┃５　　　　　　　　┃ＬＥＦＴ　　　┃　　　ウェーブ　┃"
+1080 print "┃６　　　　　　　　┃　　　　　　　┃　　　　　　　　┃"
+1090 print "┃７　　　　　　　　┃ＤＡＹ　　　　┃　　　ミサイル　┃"
+1100 print "┃８　　　　　　　　┃　　　　　　　┃　　　　　　　　┃"
+1110 print "┣━━━━━━━━━┻━━━━━━━┻━━━━━━━━┫"
+1120 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃"
+1130 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃"
+1140 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃"
+1150 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃"
+1160 print "┃　　　　　　　　　　　　　　　　　　　　　　　　　　┃"
+1170 print "┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 1175 print "　　　ＳＴＡＲ　ＷＩＴＣＨ　～ゴブリン帝国の野望～";
 1180 rem    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7
 1190 rem
@@ -47,7 +47,7 @@
 3105 gosub 20000:locate 2,P+2:print "艦長、ご指示を";
 3110 c=0
 3120 locate 20, 2+(c*2):print "→";
-3200 s=wait
+3200 s=keywait
 3205 locate 20, 2+(c*2):print " ";
 3210 if s and scan_a then goto 4000+(c*1000)
 3220 if s and scan_x1 then c=c-1:if c<0 then c=3
@@ -62,7 +62,7 @@
 4060 gosub 20000
 4070 locate 2,P+1:print "艦長!";
 4080 locate 2,P+3:print "ゴブリン戦艦がまだ";f;"隻もいます!"
-4090 d=wait
+4090 d=keywait
 4100 gosub 20000
 4110 goto 3100
 4200 ' 行き先候補
@@ -80,7 +80,7 @@
 4400 rem 候補を選ぶ
 4410 c=0
 4420 locate 2, P+1+c:print "→";
-4500 s=wait
+4500 s=keywait
 4505 locate 2, P+1+c:print " ";
 4510 if s and scan_a then goto 4600
 4520 if s and scan_x1 then c=c-1:if c<0 then c=2
@@ -93,19 +93,19 @@
 4700 gosub 20000
 4710 locate 2,P+1:print "ハイパースペース・ドライブ";
 4720 locate 2,P+3:print "　　スタンバイＯＫ！"
-4730 d=wait
+4730 d=keywait
 4740 gosub 20000
 4750 locate 2,P+2:print "次のエリアにジャンプします";
-4760 d=wait
+4760 d=keywait
 4780 gosub 20000
 4785 for y=0 to 7:for x=0 to 7:locate 2+x,2+y:print "※";:next:next
 4790 waitvb 75
 4795 if E>10 then E=E-10:goto 4800
 4796 locate 2,P+1:print "艦長!　エネルギーが足りません!";
 4797 locate 4,P+3:print "通常空間に復帰できません!!";
-4798 d=wait:goto 19000
+4798 d=keywait:goto 19000
 4800 locate 2,P+2:print "ジャンプ成功!　レーダー動作します";
-4810 d=wait
+4810 d=keywait
 4820 gosub 20000
 4890 D=D+1:L=L-1:goto 2200
 5000 '******バーニア*******
@@ -118,7 +118,7 @@
 5070 gosub 20000
 5080 locate 2,P+1:print "艦長!";
 5090 locate 2,P+3:print "コースは0から360までです!";
-5095 d=wait:goto 5010
+5095 d=keywait:goto 5010
 5100 gosub 20000
 5110 locate 2,P+1:print "エリア内移動・スタンバイ";
 5120 locate 2,P+3:print "距離は? (1-12)";
@@ -129,11 +129,11 @@
 5155 gosub 20000
 5160 locate 2,P+1:print "艦長!";
 5170 locate 2,P+3:print "距離は1から12までです!";
-5180 d=wait:goto 5100
+5180 d=keywait:goto 5100
 5190 gosub 20000
 5192 locate 2,P+1:print "艦長!";
 5194 locate 2,P+3:print "エネルギーが足りません!";
-5198 d=wait:goto 5100
+5198 d=keywait:goto 5100
 5200 '移動アニメーション
 5210 gosub 20000
 5215 'locate 2+S,2+T:print "　";
@@ -146,7 +146,7 @@
 5261 'debug S,T,x,y,a,b,i,s
 5262 if x<0 or x>7 or y<0 or y>7 then goto 5400
 5264 if @(A+x+y*8)=0 then goto 5270
-5266 gosub 20000:locate 2,P+2:print "衝突回避!　緊急停止!";d=wait
+5266 gosub 20000:locate 2,P+2:print "衝突回避!　緊急停止!";d=keywait
 5268 goto 5400 'ループを強制終了させる
 5270 if c=x and d=y then goto 5300 '見かけ上の移動が起きていない
 5272 j=j+1
@@ -168,7 +168,7 @@
 6070 gosub 20000
 6080 locate 2,P+1:print "艦長!";
 6090 locate 2,P+3:print "　エネルギー量は1から";E-1;"までです!";
-6095 d=wait:goto 6010
+6095 d=keywait:goto 6010
 6100 gosub 20000
 6110 ' 存在するオブジェクト数を数える
 6120 f=0
@@ -178,14 +178,14 @@
 6160 e=s/f:if e<1 then e=1 'eは1標的あたりの攻撃量
 6170 gosub 20000
 6180 locate 2,P+2:print "ウェーブキヤノン・発射!";
-6190 d=wait
+6190 d=keywait
 6200 for y=0 to 7:for x=0 to 7
 6210 if @(A+x+y*8) <= 0 then goto 6400
 6220 gosub 20000
 6230 locate 2,P+1:print "(";x+1;",";y+1;")のゴブリン戦艦にダメージ";e;
 6240 @(A+x+y*8)=@(A+x+y*8)-e:if @(A+x+y*8)<=0 then @(A+x+y*8)=0:goto 6300
 6245 locate 4,P+3:print "(残りエネルギー";@(A+x+y*8);")";
-6250 d=wait
+6250 d=keywait
 6290 goto 6400
 6300 locate 4,P+3:print "ゴブリン戦艦、撃沈!";:H=H+1
 6350 X=x:Y=y:gosub 24000 '爆発
@@ -198,7 +198,7 @@
 7020 gosub 20000
 7030 locate 2,P+1:print "艦長!";
 7040 locate 2,P+3:print "ミサイルの残弾はゼロです!";
-7050 d=wait
+7050 d=keywait
 7090 goto 3100
 7100 gosub 20000
 7110 locate 2,P+1:print "ミサイル・スタンバイ";
@@ -209,7 +209,7 @@
 7160 gosub 20000
 7170 locate 2,P+1:print "艦長!";
 7180 locate 2,P+3:print "コースは0から360までです!";
-7190 d=wait:goto 7100
+7190 d=keywait:goto 7100
 7200 '移動アニメーション
 7205 M=M-1:gosub 25000
 7210 gosub 20000
@@ -232,7 +232,7 @@
 7510 gosub 20000
 7515 locate 2,P+1:print "艦長!";
 7520 locate 4,P+3:print "攻撃は失敗です!";
-7530 d=wait
+7530 d=keywait
 7590 D=D+1:goto 3000
 7600 'あたり!
 7610 gosub 20000
@@ -242,14 +242,14 @@
 7650 if @(A+x+y*8)=-2 then print "輸送船に命中しました!";
 7660 if @(A+x+y*8)>0 then print "ゴブリン戦艦に命中しました!";
 7670 X=x:Y=y:gosub 24000 '爆発
-7680 'd=wait
+7680 'd=keywait
 7690 gosub 20000
 7700 locate 4,P+2
 7710 if @(A+x+y*8)=-1 then print "小惑星の消滅を確認!";
 7720 if @(A+x+y*8)=-2 then print "輸送船乗組員の救助のため10日必要です";:D=D+1
 7730 if @(A+x+y*8)>0 then print "ゴブリン戦艦を撃沈!";:H=H+1
 7740 @(A+x+y*8)=0 'そこにはもう何もない
-7750 d=wait
+7750 d=keywait
 7760 if L=0 then gosub 26000:if Y=0 then goto 18000
 7790 D=D+1:goto 3000
 
@@ -295,12 +295,12 @@
 11025 n=@(A+x+y*8)/4+rnd(@(A+x+y*8)/2):if n<1 then 11900
 11030 gosub 20000
 11040 locate 2,P+1:print "(";x+1;",";y+1;")のゴブリン戦艦よりの攻撃!";
-11050 d=wait
+11050 d=keywait
 11070 locate 4,P+3:print "WITCH号に";n;"のダメージ!";
 11075 @(A+x+y*8)=@(A+x+y*8)-n
 11080 E=E-n:if E<0 then E=0
 11090 gosub 25000
-11100 d=wait
+11100 d=keywait
 11110 if E>0 then goto 11900
 11120 gosub 20000
 11130 locate 2,P+1:print "艦長!";
@@ -324,7 +324,7 @@
 12080 gosub 20000
 12090 locate 2,P+1:print "艦長!";
 12100 locate 4,P+3:print "輸送船から補給を受けます。";
-12110 d=wait
+12110 d=keywait
 12120 E=4000:M=10
 12130 gosub 25000 'ステータス更新
 12190 return
@@ -347,7 +347,7 @@
 17160 waitvb 30:print "  連邦艦隊ナンバーワン艦長の君に命じる":print
 17170 waitvb 30:print "  最新鋭戦艦WITCH号を指揮し":print
 17180 waitvb 30:print "  侵入したゴブリン戦艦を撃破せよ"
-17190 d=wait
+17190 d=keywait
 
 17200 cls
 17210 for i=0 to 4
@@ -363,7 +363,7 @@
 17310 if i=4 then locate 2,13:print"　■　　　■　　■　　■　　　■■■　　　■　　■"
 17320 waitvb 30:next
 17330 locate 9,15:print "～ゴブリン帝国の野望～";
-17340 d=wait
+17340 d=keywait
 17400 cls
 17410 print " ***WITCH号の最新装備を紹介する***":print
 17420 waitvb 30:print " 量子レーダー:"
@@ -377,13 +377,13 @@
 17500 print " 　エリア内のすべての敵を同時攻撃":print
 17510 waitvb 30:print " 反応弾頭ミサイル:"
 17520 print " 　敵艦も小惑星も一撃で粉砕する"
-17590 d=wait
+17590 d=keywait
 17600 cls
 17610 locate 8,8:print "それでは健闘を祈る!"
-17690 d=wait
+17690 d=keywait
 17700 cls
 17710 locate 5,8:print "艦長!　WITCH号、出港します!"
-17790 d=wait
+17790 d=keywait
 17900 return
 
 18000 'GOOD ENDING
@@ -396,7 +396,7 @@
 18050 waitvb 75:print " 全人類から感謝の言葉をおくる":print
 18060 waitvb 75:locate 10,14:print "ありがとう!"
 18070 waitvb 75:locate 10,16:print "CONGRATURATIONS!";
-18080 d=wait
+18080 d=keywait
 18090 end
 
 19000 'BAD ENDING
@@ -406,7 +406,7 @@
 19040 waitvb 75:print " この日、地球連邦政府は、ゴブリン帝国に降伏":print
 19050 waitvb 75:print " 地球人はゴブリン帝国の奴隷となった":print
 19060 waitvb 75:locate 17,16:print "GAME OVER!";
-19080 d=wait
+19080 d=keywait
 19090 end
 20000 ' clear message
 20010 for i=11 to 15:locate 1,i
@@ -424,7 +424,7 @@
 21200 locate X+v+1,Y+1:print "↑";
 21210 locate X+v+1,Y+3:print "↓";
 21220 for i=0 to 3:locate X+i+1,Y+2:print @(W+i);:next
-21300 s=wait
+21300 s=keywait
 21310 locate X+v+1,Y+1:print "　";
 21320 locate X+v+1,Y+3:print "　";
 21330 if s and scan_x3 then @(W+v)=@(W+v)-1:if @(W+v)<0 then @(W+v)=9
@@ -471,7 +471,7 @@
 24010 locate 2+X,2+Y:print "●";:waitvb 30
 24020 locate 2+X,2+Y:print "※";:waitvb 30
 24030 locate 2+X,2+Y:print "　";
-24040 d=wait
+24040 d=keywait
 24090 return
 25000 '******ステータス表示更新*****
 25010 locate 11,3:print "　　　　　　　";
