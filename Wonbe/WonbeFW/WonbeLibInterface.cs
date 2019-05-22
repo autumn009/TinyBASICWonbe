@@ -14,7 +14,10 @@ namespace WonbeFW
         {
             await OutputStringAsync(prompt);
             //await WriteLineAsync();
-            return await Console.In.ReadLineAsync();
+            await CursorVisibleAsync(true);
+            string r = await Console.In.ReadLineAsync();
+            await CursorVisibleAsync(false);
+            return r;
         }
 
         public async override Task<bool> LocateAsync(int x, int y)
@@ -162,8 +165,9 @@ namespace WonbeFW
 
         public async override Task<short> GetKeyWaitAsync()
         {
-            await Task.Delay(0);    // dummy
+            await CursorVisibleAsync(true);
             var r = Console.ReadKey(true);
+            await CursorVisibleAsync(false);
             return (short)r.Key;
         }
 
@@ -179,6 +183,14 @@ namespace WonbeFW
         {
             await Task.Delay(0);    // dummy
             return (Keyboard.GetKeyStates((Key)keycode) & KeyStates.Down) > 0;
+        }
+
+        public async override Task<bool> CursorVisibleAsync(bool? bVisible)
+        {
+            await Task.Delay(0);    // dummy
+            bool old = Console.CursorVisible;
+            if (bVisible != null) Console.CursorVisible = (bool)bVisible;
+            return old;
         }
     }
 

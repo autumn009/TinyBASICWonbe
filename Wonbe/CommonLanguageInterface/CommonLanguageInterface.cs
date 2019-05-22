@@ -64,6 +64,8 @@ namespace CommonLanguageInterface
         public abstract Task<short> GetKeyWaitAsync();
         public abstract Task<short> GetKeyScanAsync();
         public abstract Task<bool> GetKeyDownAsync(int keycode);
+
+        public abstract Task<bool> CursorVisibleAsync(bool? bVisible );
     }
     public abstract class AbastractLanguageBase
     {
