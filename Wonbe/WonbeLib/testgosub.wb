@@ -1,19 +1,19 @@
-100 'gosub‚Æƒ[ƒJƒ‹•Ï”‚ÌƒeƒXƒg
+100 'gosubã¨ãƒ­ãƒ¼ã‚«ãƒ«å¤‰æ•°ã®ãƒ†ã‚¹ãƒˆ
 200 a=1
 210 gosub 1000
-220 if a <> 1 then print "220‚ÅƒGƒ‰["
+220 if a <> 1 then print "220ã§ã‚¨ãƒ©ãƒ¼"
 300 print "main return"
 900 end
 1000 'sub1
 1010 print "sub1"
 1100 a=123
-1200 if a <> 123 then print "1200‚ÅƒGƒ‰["
+1200 if a <> 123 then print "1200ã§ã‚¨ãƒ©ãƒ¼"
 1300 gosub 2000
-1400 if a <> 123 then print "1400‚ÅƒGƒ‰["
+1400 if a <> 123 then print "1400ã§ã‚¨ãƒ©ãƒ¼"
 1450 print "sub1 return"
 1500 return
 2000 'sub2
 2010 print "sub2"
 2100 a=321
-2200 if a <> 321 then print "2200‚ÅƒGƒ‰["
+2200 if a <> 321 then print "2200ã§ã‚¨ãƒ©ãƒ¼"
 2500 return

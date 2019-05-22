@@ -1,9 +1,9 @@
-10 if 1 then print "ğŒ¬—§"
-20 if 0 then print "ğŒ•s¬—§"
-30 if 1 then if 1 then if 1 then print "‘½dğŒ¬—§"
-40 print "if‚É‚æ‚éƒ‹[ƒv"
+10 if 1 then print "æ¡ä»¶æˆç«‹"
+20 if 0 then print "æ¡ä»¶ä¸æˆç«‹"
+30 if 1 then if 1 then if 1 then print "å¤šé‡æ¡ä»¶æˆç«‹"
+40 print "ifã«ã‚ˆã‚‹ãƒ«ãƒ¼ãƒ—"
 50 i = 0
 60 print i;" ";
 70 i=i+1
 80 if i < 10 then goto 60
-90 print "I—¹",wait
+90 print "çµ‚äº†",wait

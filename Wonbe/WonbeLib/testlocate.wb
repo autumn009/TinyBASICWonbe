@@ -1,4 +1,4 @@
-2 rem cls, locale‚ÌƒeƒXƒg
+2 rem cls, localeã®ãƒ†ã‚¹ãƒˆ
 5 cls
 7 randomize tick
 10 for i=0 to 999

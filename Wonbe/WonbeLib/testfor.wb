@@ -1,5 +1,5 @@
-100 rem ƒƒ“‚×‚¥ ƒeƒXƒgƒvƒƒOƒ‰ƒ€
-200 rem for‚ÌƒeƒXƒg‚»‚Ì1
+100 rem ãƒ¯ãƒ³ã¹ã‡ ãƒ†ã‚¹ãƒˆãƒ—ãƒ­ã‚°ãƒ©ãƒ 
+200 rem forã®ãƒ†ã‚¹ãƒˆãã®1
 210 print "loop by global=":for I=0 to 9:print I,:next:print
 215 print "PUSH ANY BUTTON";wait
 220 print "loop by local=":for i=0 to 9:print i,:next:print
