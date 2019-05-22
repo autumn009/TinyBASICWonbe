@@ -38,6 +38,7 @@ namespace WonbeFW
                     termEvent.Set();
                 }
             });
+            thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             termEvent.WaitOne();
         }
