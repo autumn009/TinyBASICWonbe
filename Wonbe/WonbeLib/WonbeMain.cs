@@ -1571,7 +1571,7 @@ namespace WonbeLib
                     }
                 }
                 // コメントならそのあと何があっても無視
-                else if (srcLine[src] == '\'') return true;
+                // else if (srcLine[src] == '\'') return true;
                 else if (srcLine[src] == '"')
                 {
                     src++;
