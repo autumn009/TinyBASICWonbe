@@ -1623,9 +1623,9 @@ namespace WonbeLib
                     }
                     var token = intermeditateExecitionLine[intermeditateExecutionPointer++];
                     if (token is EOLWonbeInterToken) break;
-                    if (token.GetChar() == ' ' || token.GetChar() == '\t' || token.GetChar() == ':')
+                    if (token is WhitespaceWonbeInterToken || token.GetChar() == ' ' || token.GetChar() == '\t' || token.GetChar() == ':')
                     {
-                        /* nop */
+                        /* not */
                     }
                     else if (token.GetChar() == '\'')
                     {	/* comment */
