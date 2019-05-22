@@ -434,7 +434,7 @@ namespace WonbeLib
                 if (t < 0) return (short)-t;
                 return t;
             }
-            if (token.IsKeyword("keydown")) return (short)(await Environment.GetKeyDownAsync(await calcValue()) ? 1 : 0);
+            if (token.IsKeyword("keydown")) return (short)(await Environment.GetKeyDownAsync(await calcValue()) ? -1 : 0);
             if (token.IsKeyword("tick")) return (short)(DateTime.Now.Ticks / 10);
             if (token.IsKeyword("textwidth")) return (short)await Environment.GetTextWidthAsync();
             if (token.IsKeyword("textheight")) return (short)await Environment.GetTextHeightAsync();

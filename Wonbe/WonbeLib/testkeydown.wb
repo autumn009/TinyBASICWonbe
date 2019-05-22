@@ -1,2 +1,2 @@
-﻿10 print "Press A key:";keydown(65)
+﻿10 print "Press A key:";keydown(44)
 20 goto 10
