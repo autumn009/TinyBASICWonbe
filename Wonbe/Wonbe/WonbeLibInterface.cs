@@ -178,6 +178,16 @@ namespace Wonbe
         {
             throw new NotImplementedException("GetKeyDownAsync is not supported in .NET Core Console Runner");
         }
+
+        public override Task<bool> CursorVisibleAsync(bool? bVisible)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<short> SetScreenMode(short newMode)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

@@ -1442,6 +1442,13 @@ namespace WonbeLib
             }
         }
 
+        private async Task st_screenmode()
+        {
+            var newMode = await expr();
+            if (bForceToReturnSuper) return;
+            Environment.SetScreenMode( newMode );
+       }
+
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
         {
             foreach (var n in assocTable)
@@ -1490,6 +1497,7 @@ namespace WonbeLib
                     new KeywordAssociation("beep",st_beep),
                     new KeywordAssociation("color",st_color),
                     new KeywordAssociation("backcolor",st_backcolor),
+                    new KeywordAssociation("screenmode",st_screenmode),
                     new KeywordAssociation("and"),
                     new KeywordAssociation("or"),
                     new KeywordAssociation("xor"),

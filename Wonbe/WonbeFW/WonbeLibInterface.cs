@@ -14,21 +14,52 @@ namespace WonbeFW
         private const char boxDrawingLow = (char)0x2500;
         private const char boxDrawingHigh = (char)0x257f;
 
+        private bool isWonderWitchCompatible = false;
+
+        private const string hanTable = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ";
+        private const string zenTable = "　！”＃＄％＆’（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［￥］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｛｜｝￣・ヲァィゥェォャュョッーアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン゛゜";
+
+        private char toZen(char item)
+        {
+            int index = hanTable.IndexOf(item);
+            if (index >= 0) return zenTable[index];
+            return item;
+        }
+
+        private bool isHan(char item)
+        {
+            return hanTable.IndexOf(item) >= 0;
+        }
+
         public async Task rawDrawStringAsync(string str)
         {
-            if (str.All(c => c < boxDrawingLow || c > boxDrawingHigh))
-                await Console.Out.WriteAsync(str);
-            else
+            if (isWonderWitchCompatible)
             {
-                foreach (var item in str)
+                if (str.All(c => (c < boxDrawingLow || c > boxDrawingHigh) && !isHan(c)))
+                    await Console.Out.WriteAsync(str);
+                else
                 {
-                    int old = Console.CursorLeft;
-                    await Console.Out.WriteAsync(item);
-                    if (item >= boxDrawingLow && item <= boxDrawingHigh && Console.CursorLeft != old + 2)
+                    foreach (var item in str)
                     {
-                        Console.CursorLeft = old + 2;
+                        int old = Console.CursorLeft;
+                        if (isHan(item))
+                        {
+                            await Console.Out.WriteAsync(item);
+                        }
+                        else
+                        {
+                            await Console.Out.WriteAsync(toZen(item));
+                            if (item >= boxDrawingLow && item <= boxDrawingHigh && Console.CursorLeft != old + 2)
+                            {
+                                Console.CursorLeft = old + 2;
+                            }
+                        }
                     }
                 }
+            }
+            else
+            {
+                await Console.Out.WriteAsync(str);
             }
         }
 
@@ -48,7 +79,10 @@ namespace WonbeFW
             if (y < 0) return false;
             if (x >= Console.BufferWidth) return false;
             if (y >= Console.BufferHeight) return false;
-            Console.SetCursorPosition(x, y);
+            if (isWonderWitchCompatible)
+                Console.SetCursorPosition(x * 2, y);
+            else
+                Console.SetCursorPosition(x, y);
             await Task.Delay(0);    // dummy
             return true;
         }
@@ -213,6 +247,14 @@ namespace WonbeFW
             bool old = Console.CursorVisible;
             if (bVisible != null) Console.CursorVisible = (bool)bVisible;
             return old;
+        }
+
+        public async override Task<short> SetScreenMode(short newMode)
+        {
+            var old = isWonderWitchCompatible ? 1 : 0;
+            isWonderWitchCompatible = newMode != 0;
+            await Task.Delay(0);    // dummy
+            return (short)old;
         }
     }
 
