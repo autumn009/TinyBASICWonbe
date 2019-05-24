@@ -1,4 +1,4 @@
-100 cls:screenmode 1:gosub 17000 'オープニング
+100 cls:screenmode 1:' gosub 17000 'オープニング
 1000 cls
 1010 print "┏━━━━━━━━━┳━━━━━━━┳━━━━━━━━┓"
 1020 print "┃　１２３４５６７８┃　　　　　　　┃　　　　　　　　┃"
@@ -49,9 +49,9 @@
 3120 locate 20, 2+(c*2):print "→";
 3200 s=keywait
 3205 locate 20, 2+(c*2):print " ";
-3210 if s and scan_a then goto 4000+(c*1000)
-3220 if s and scan_x1 then c=c-1:if c<0 then c=3
-3230 if s and scan_x3 then c=c+1:if c>3 then c=0
+3210 if s = getkeycode("Spacebar") then goto 4000+(c*1000)
+3220 if s = getkeycode("UpArrow") then c=c-1:if c<0 then c=3
+3230 if s = getkeycode("DownArrow") then c=c+1:if c>3 then c=0
 3290 goto 3120
 4000 '*******ジャンプ*******
 4010 f=0
@@ -75,16 +75,16 @@
 4260 locate 4,P+1+i
 4270 print "ゴブリン";@(W+i*3);
 4280 print "　輸送船";@(W+i*3+1);
-4290 print "　小惑星"@(W+i*3+2);
+4290 print "　小惑星";@(W+i*3+2);
 4300 next
 4400 rem 候補を選ぶ
 4410 c=0
 4420 locate 2, P+1+c:print "→";
 4500 s=keywait
 4505 locate 2, P+1+c:print " ";
-4510 if s and scan_a then goto 4600
-4520 if s and scan_x1 then c=c-1:if c<0 then c=2
-4530 if s and scan_x3 then c=c+1:if c>2 then c=0
+4510 if s = getkeycode("Spacebar") then goto 4600
+4520 if s = getkeycode("UpArrow") then c=c-1:if c<0 then c=2
+4530 if s = getkeycode("DownArrow")  then c=c+1:if c>2 then c=0
 4590 goto 4420
 4600 ' 次のエリアに行く
 4610 B=@(W+c*3+1)
@@ -427,12 +427,12 @@
 21300 s=keywait
 21310 locate X+v+1,Y+1:print "　";
 21320 locate X+v+1,Y+3:print "　";
-21330 if s and scan_x3 then @(W+v)=@(W+v)-1:if @(W+v)<0 then @(W+v)=9
-21340 if s and scan_x1 then @(W+v)=@(W+v)+1:if @(W+v)>9 then @(W+v)=0
-21350 if s and scan_x2 then v=v+1:if v>3 then v=0
-21360 if s and scan_x4 then v=v-1:if v<0 then v=3
-21365 if s and scan_a then goto 21400
-21370 if s and scan_b then Z=-1:return
+21330 if s = getkeycode("DownArrow") then @(W+v)=@(W+v)-1:if @(W+v)<0 then @(W+v)=9
+21340 if s = getkeycode("UpArrow") then @(W+v)=@(W+v)+1:if @(W+v)>9 then @(W+v)=0
+21350 if s = getkeycode("LeftArrow") then v=v+1:if v>3 then v=0
+21360 if s = getkeycode("RightArrow") then v=v-1:if v<0 then v=3
+21365 if s = getkeycode("Spacebar") then goto 21400
+21370 if s = getkeycode("Escape") then Z=-1:return
 21380 goto 21200
 21400 Z=@(W+0)*1000+@(W+1)*100+@(W+2)*10+@(W+3)
 21410 return

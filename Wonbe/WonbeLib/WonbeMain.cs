@@ -445,7 +445,31 @@ namespace WonbeLib
                     return 0;
                 }
                 await skipChar(')');
-                return await Environment.GetKeyScanCodeAsync(tokenS.TargetString);
+                var r = await Environment.GetKeyScanCodeAsync(tokenS.TargetString);
+                if( r == 0)
+                {
+                    await paramError();
+                    return 0;
+                }
+                return r;
+            }
+            if (token.IsKeyword("getkeycode"))
+            {
+                await skipChar('(');
+                var tokenS = skipEPToNonWhiteSpace() as LiteralWonbeInterToken;
+                if (tokenS == null)
+                {
+                    await syntaxError();
+                    return 0;
+                }
+                await skipChar(')');
+                var r = await Environment.GetKeyCodeAsync(tokenS.TargetString);
+                if (r == 0)
+                {
+                    await paramError();
+                    return 0;
+                }
+                return r;
             }
             if (token.IsKeyword("tick")) return (short)(DateTime.Now.Ticks / 10);
             if (token.IsKeyword("textwidth")) return (short)await Environment.GetTextWidthAsync();
@@ -1518,6 +1542,7 @@ namespace WonbeLib
                     new KeywordAssociation("abs"),
                     new KeywordAssociation("keydown"),
                     new KeywordAssociation("getkeyscancode"),
+                    new KeywordAssociation("getkeycode"),
                     new KeywordAssociation("tick"),
                     new KeywordAssociation("textwidth"),
                     new KeywordAssociation("textheight"),

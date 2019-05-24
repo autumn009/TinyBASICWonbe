@@ -263,6 +263,13 @@ namespace WonbeFW
             ScanKeyTable.Table.TryGetValue(name, out var r);
             return r;   // return 0 as not found
         }
+
+        public async override Task<short> GetKeyCodeAsync(string name)
+        {
+            await Task.Delay(0);    // dummy
+            ScanKeyTable.ConsoleTable.TryGetValue(name, out var r);
+            return r;   // return 0 as not found
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

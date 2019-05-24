@@ -69,6 +69,7 @@ namespace CommonLanguageInterface
 
         public abstract Task<short> SetScreenModeAsync(short newMode);
         public abstract Task<short> GetKeyScanCodeAsync(string name);
+        public abstract Task<short> GetKeyCodeAsync(string name);
     }
     public abstract class AbastractLanguageBase
     {
