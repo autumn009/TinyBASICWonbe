@@ -36,20 +36,20 @@ namespace WonbeFW
         {
             if (isWonderWitchCompatible)
             {
-                if (str.All(c => (c < boxDrawingLow || c > boxDrawingHigh) && !isHan(c)))
-                    await Console.Out.WriteAsync(str);
-                else
+                //if (str.All(c => (c < boxDrawingLow || c > boxDrawingHigh) && !isHan(c)))
+                //    await Console.Out.WriteAsync(str);
+                //else
                 {
                     foreach (var item in str)
                     {
                         int old = Console.CursorLeft;
                         if (isHan(item))
                         {
-                            await Console.Out.WriteAsync(item);
+                            await Console.Out.WriteAsync(toZen(item));
                         }
                         else
                         {
-                            await Console.Out.WriteAsync(toZen(item));
+                            await Console.Out.WriteAsync(item);
                             if (item >= boxDrawingLow && item <= boxDrawingHigh && Console.CursorLeft != old + 2)
                             {
                                 Console.CursorLeft = old + 2;
