@@ -8,6 +8,7 @@
     <None Remove="colordemo.wb" />
     <None Remove="ctb.wb" />
     <None Remove="janken.wb" />
+    <None Remove="maze.wb" />
     <None Remove="shoot.wb" />
     <None Remove="star.wb" />
     <None Remove="test.wb" />
@@ -29,6 +30,7 @@
     <EmbeddedResource Include="colordemo.wb" />
     <EmbeddedResource Include="ctb.wb" />
     <EmbeddedResource Include="janken.wb" />
+    <EmbeddedResource Include="maze.wb" />
     <EmbeddedResource Include="shoot.wb" />
     <EmbeddedResource Include="star.wb" />
     <EmbeddedResource Include="test.wb" />
