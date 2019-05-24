@@ -1584,7 +1584,7 @@ namespace WonbeLib
                         dst.Add(new KeywordWonbeInterToken(lineNumber, token));
                         src += token.TargetString.Length;
                         // remステートメントなら、そのあとに何が書かれていても無視
-                        if (token.TargetString == "rem") return true;
+                        //if (token.TargetString == "rem") return true;
                     }
                     else
                     {
