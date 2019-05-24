@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -10,6 +11,27 @@ namespace WonbeFW
 {
     public class WonbeEnviroment : LanguageBaseEnvironmentInfo
     {
+        private const char boxDrawingLow = (char)0x2500;
+        private const char boxDrawingHigh = (char)0x257f;
+
+        public async Task rawDrawStringAsync(string str)
+        {
+            if (str.All(c => c < boxDrawingLow || c > boxDrawingHigh))
+                await Console.Out.WriteAsync(str);
+            else
+            {
+                foreach (var item in str)
+                {
+                    int old = Console.CursorLeft;
+                    await Console.Out.WriteAsync(item);
+                    if (item >= boxDrawingLow && item <= boxDrawingHigh && Console.CursorLeft != old + 2)
+                    {
+                        Console.CursorLeft = old + 2;
+                    }
+                }
+            }
+        }
+
         public override async Task<string> LineInputAsync(string prompt)
         {
             await OutputStringAsync(prompt);
@@ -33,12 +55,12 @@ namespace WonbeFW
 
         public override async Task OutputCharAsync(char ch)
         {
-            await Console.Out.WriteAsync(ch);
+            await rawDrawStringAsync(ch.ToString());
         }
 
         public override async Task OutputStringAsync(string str)
         {
-            await Console.Out.WriteAsync(str);
+            await rawDrawStringAsync(str);
         }
 
         public override async Task DebugOutputStringAsync(string str)
@@ -47,7 +69,7 @@ namespace WonbeFW
             var oldBack = Console.BackgroundColor;
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.Red;
-            await Console.Out.WriteAsync(str);
+            await rawDrawStringAsync(str);
             Console.ForegroundColor = oldFore;
             Console.BackgroundColor = oldBack;
         }
