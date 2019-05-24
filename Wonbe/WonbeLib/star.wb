@@ -25,6 +25,7 @@
 2010 E=4000 'EはWITCH号のエネルギー
 2020 M=10   'MはWITCH号の所持ミサイル
 2030 L=10   'Lはクリアすべきエリアの残り数
+2035 if Z=1 then L=1	' CHEAT MODE FOR WIN
 2040 D=1    'Dは現在の日数 (1アクション1日)
 2042 S=0    'WITCH号のX位置
 2044 T=0    'WITCH号のY位置
@@ -397,7 +398,7 @@
 18060 waitvb 75:locate 10,14:print "ありがとう!"
 18070 waitvb 75:locate 10,16:print "CONGRATURATIONS!";
 18080 d=keywait
-18090 end
+18090 print:screenmode 0:cursorvisible 1:end
 
 19000 'BAD ENDING
 19010 cls:print
@@ -407,7 +408,8 @@
 19050 waitvb 75:print " 地球人はゴブリン帝国の奴隷となった":print
 19060 waitvb 75:locate 17,16:print "GAME OVER!";
 19080 d=keywait
-19090 end
+19090 print:screenmode 0:cursorvisible 1:end
+
 20000 ' clear message
 20010 for i=11 to 15:locate 1,i
 20020 print "　　　　　　　　　　　　　　　　　　　　　　　　　　";
@@ -491,8 +493,9 @@
 26090 return
 
 30000 ' オープニングスキップ確認
-30010 cls
+30010 cls:Z=0
 30020 print "オープニングをスキップする場合はSキーを。それ以外の場合はそれ以外のキーを押して下さい。"
 30030 s = keywait
 30040 if s = getkeycode("S") then return
+30050 if s = getkeycode("W") then Z=1:return	' CHEAT MODE FOR WIN
 30090 goto 17000
