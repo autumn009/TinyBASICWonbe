@@ -1,2 +1,3 @@
-﻿10 print "Press A key:";keydown(44)
+﻿10 rem print "Press A key:";keydown(44)
+15 print "Press A key:";keydown(GetKeyScanCode("A"))
 20 goto 10

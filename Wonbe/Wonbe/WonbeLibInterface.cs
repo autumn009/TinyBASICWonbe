@@ -188,6 +188,16 @@ namespace Wonbe
         {
             throw new NotImplementedException();
         }
+
+        public override Task<short> SetScreenModeAsync(short newMode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task<short> GetKeyScanCodeAsync(string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class WonbeLanguageBase : AbastractLanguageBase

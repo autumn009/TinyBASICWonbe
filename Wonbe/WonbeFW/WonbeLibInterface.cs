@@ -249,12 +249,19 @@ namespace WonbeFW
             return old;
         }
 
-        public async override Task<short> SetScreenMode(short newMode)
+        public async override Task<short> SetScreenModeAsync(short newMode)
         {
             var old = isWonderWitchCompatible ? 1 : 0;
             isWonderWitchCompatible = newMode != 0;
             await Task.Delay(0);    // dummy
             return (short)old;
+        }
+
+        public async override Task<short> GetKeyScanCodeAsync(string name)
+        {
+            await Task.Delay(0);    // dummy
+            ScanKeyTable.Table.TryGetValue(name, out var r);
+            return r;   // return 0 as not found
         }
     }
 

@@ -435,6 +435,18 @@ namespace WonbeLib
                 return t;
             }
             if (token.IsKeyword("keydown")) return (short)(await Environment.GetKeyDownAsync(await calcValue()) ? -1 : 0);
+            if (token.IsKeyword("getkeyscancode"))
+            {
+                await skipChar('(');
+                var tokenS = skipEPToNonWhiteSpace() as LiteralWonbeInterToken;
+                if (tokenS == null)
+                {
+                    await syntaxError();
+                    return 0;
+                }
+                await skipChar(')');
+                return await Environment.GetKeyScanCodeAsync(tokenS.TargetString);
+            }
             if (token.IsKeyword("tick")) return (short)(DateTime.Now.Ticks / 10);
             if (token.IsKeyword("textwidth")) return (short)await Environment.GetTextWidthAsync();
             if (token.IsKeyword("textheight")) return (short)await Environment.GetTextHeightAsync();
@@ -1446,8 +1458,8 @@ namespace WonbeLib
         {
             var newMode = await expr();
             if (bForceToReturnSuper) return;
-            Environment.SetScreenMode( newMode );
-       }
+            await Environment.SetScreenModeAsync(newMode);
+        }
 
         public KeywordAssociation searchToken(string srcLine, int from, KeywordAssociation[] assocTable)
         {
@@ -1505,6 +1517,7 @@ namespace WonbeLib
                     new KeywordAssociation("rnd"),
                     new KeywordAssociation("abs"),
                     new KeywordAssociation("keydown"),
+                    new KeywordAssociation("getkeyscancode"),
                     new KeywordAssociation("tick"),
                     new KeywordAssociation("textwidth"),
                     new KeywordAssociation("textheight"),
