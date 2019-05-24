@@ -1,4 +1,4 @@
-100 cls:screenmode 1:' gosub 17000 'オープニング
+100 cls:screenmode 1:cursorvisible 0:' gosub 17000 'オープニング
 1000 cls
 1010 print "┏━━━━━━━━━┳━━━━━━━┳━━━━━━━━┓"
 1020 print "┃　１２３４５６７８┃　　　　　　　┃　　　　　　　　┃"
@@ -429,8 +429,8 @@
 21320 locate X+v+1,Y+3:print "　";
 21330 if s = getkeycode("DownArrow") then @(W+v)=@(W+v)-1:if @(W+v)<0 then @(W+v)=9
 21340 if s = getkeycode("UpArrow") then @(W+v)=@(W+v)+1:if @(W+v)>9 then @(W+v)=0
-21350 if s = getkeycode("LeftArrow") then v=v+1:if v>3 then v=0
-21360 if s = getkeycode("RightArrow") then v=v-1:if v<0 then v=3
+21350 if s = getkeycode("RightArrow") then v=v+1:if v>3 then v=0
+21360 if s = getkeycode("LeftArrow") then v=v-1:if v<0 then v=3
 21365 if s = getkeycode("Spacebar") then goto 21400
 21370 if s = getkeycode("Escape") then Z=-1:return
 21380 goto 21200

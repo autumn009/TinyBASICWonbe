@@ -15,6 +15,7 @@ namespace WonbeFW
         private const char boxDrawingHigh = (char)0x257f;
 
         private bool isWonderWitchCompatible = false;
+        private bool cursorPermanentVisible = true;
 
         private const string hanTable = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ";
         private const string zenTable = "　！”＃＄％＆’（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［￥］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｛｜｝￣・ヲァィゥェォャュョッーアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン゛゜";
@@ -67,7 +68,7 @@ namespace WonbeFW
         {
             await OutputStringAsync(prompt);
             //await WriteLineAsync();
-            await CursorVisibleAsync(true);
+            await CursorVisibleAsync(cursorPermanentVisible);
             string r = await Console.In.ReadLineAsync();
             await CursorVisibleAsync(false);
             return r;
@@ -221,7 +222,7 @@ namespace WonbeFW
 
         public async override Task<short> GetKeyWaitAsync()
         {
-            await CursorVisibleAsync(true);
+            await CursorVisibleAsync(cursorPermanentVisible);
             var r = Console.ReadKey(true);
             await CursorVisibleAsync(false);
             return (short)r.Key;
@@ -246,6 +247,14 @@ namespace WonbeFW
             await Task.Delay(0);    // dummy
             bool old = Console.CursorVisible;
             if (bVisible != null) Console.CursorVisible = (bool)bVisible;
+            return old;
+        }
+
+        public async override Task<bool> CursorPermanentVisibleAsync(bool? bVisible)
+        {
+            await Task.Delay(0);    // dummy
+            bool old = cursorPermanentVisible;
+            if (bVisible != null) cursorPermanentVisible = (bool)bVisible;
             return old;
         }
 
