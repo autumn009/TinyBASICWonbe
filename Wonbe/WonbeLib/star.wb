@@ -1,4 +1,4 @@
-100 cls:screenmode 1:cursorvisible 0:' gosub 17000 'オープニング
+100 cls:screenmode 1:cursorvisible 0: gosub 30000 'オープニング
 1000 cls
 1010 print "┏━━━━━━━━━┳━━━━━━━┳━━━━━━━━┓"
 1020 print "┃　１２３４５６７８┃　　　　　　　┃　　　　　　　　┃"
@@ -489,3 +489,10 @@
 26030 if @(A+x+y*8)>0 then Y=Y+1
 26040 next:next
 26090 return
+
+30000 ' オープニングスキップ確認
+30010 cls
+30020 print "オープニングをスキップする場合はSキーを。それ以外の場合はそれ以外のキーを押して下さい。"
+30030 s = keywait
+30040 if s = getkeycode("S") then return
+30090 goto 17000
